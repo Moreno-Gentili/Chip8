@@ -1,6 +1,6 @@
 namespace Chip8.Components;
 
-public class Clock : IClock
+public class Clock
 {
     private const int hertz = 60;
     private readonly Timer timer;
@@ -13,7 +13,7 @@ public class Clock : IClock
 
     private void RaiseTick(object? state)
     {
-        System.Threading.Thread.Sleep()
+        System.Threading.Thread.Sleep(hertz);
         Tick?.Invoke();
     }
 }

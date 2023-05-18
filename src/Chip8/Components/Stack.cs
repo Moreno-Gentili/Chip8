@@ -1,4 +1,4 @@
-namespace Chip8.Hardware;
+namespace Chip8.Components;
 
 public class Stack
 {
