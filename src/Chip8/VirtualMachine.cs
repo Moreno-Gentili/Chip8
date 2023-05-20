@@ -1,25 +1,50 @@
 using Chip8.Model.IO;
 using Chip8.Components;
+using Chip8.Model;
+using Haukcode.HighResolutionTimer;
 
 namespace Chip8;
 
-public class VirtualMachine
+public class VirtualMachine : IVirtualMachine
 {
-    private readonly Memory memory = new Memory();
-    private readonly Register[] registers = new Register[16];
-    private readonly ICassette cassette;
-    private readonly IDisplay display;
-    private readonly ISpeaker speaker;
+    // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
 
-    public VirtualMachine(ICassette cassette, IDisplay display, ISpeaker speaker)
+    private readonly HighResolutionTimer timer;
+    private byte[] memory = new byte[4096];
+    private int cyclesPerTick = 8;
+
+    public VirtualMachine()
     {
-        this.cassette = cassette;
-        this.display = display;
-        this.speaker = speaker;
+        timer = new HighResolutionTimer();
+    }
+
+    public void Pause()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Reset()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Resume()
+    {
+        throw new NotImplementedException();
     }
 
     public void Run()
     {
         
+    }
+
+    public void Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SetSpeed(int cyclesPerTick)
+    {
+        throw new NotImplementedException();
     }
 }

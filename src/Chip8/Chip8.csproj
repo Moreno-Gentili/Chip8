@@ -4,6 +4,11 @@
     <ProjectReference Include="..\Chip8.Model\Chip8.Model.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.HighPerformance" Version="8.2.0" />
+    <PackageReference Include="Haukcode.HighResolutionTimer" Version="1.1.0" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

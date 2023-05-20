@@ -8,32 +8,36 @@ public class Sprite : ISprite
 
     public Sprite(params byte[] lines)
     {
-        if (lines.Length > maxHeight)
+        if (lines.Length is 0 or > maxHeight)
         {
-            throw new ArgumentException($"Sprites with an height greater than {maxHeight} are not supported", nameof(lines));
+            throw new ArgumentException($"Sprites must have an height between 1 and {maxHeight}", nameof(lines));
         }
 
         this.lines = lines;
     }
 
-    public int Width => 8;
-    public int Height => lines.Length;
+    public byte Width => 8;
+    public byte Height => Convert.ToByte(lines.Length);
 
-    public bool this[int x, int y]
+    public bool this[byte x, byte y]
     {
         get
         {
-            if (x < 0 || x > Width)
-            {
-                throw new ArgumentException($"Must be between 0 and {Width}", nameof(x));
-            }
-
-            if (y < 0 || y > Height)
-            {
-                throw new ArgumentException($"Must be between 0 and {Height}", nameof(y));
-            }
-
+            EnsureCoordinatesAreWithinBounds(x, y);
             return (lines[y] & (1 << x)) != 0;
+        }
+    }
+
+    private void EnsureCoordinatesAreWithinBounds(byte x, byte y)
+    {
+        if (x < 0 || x >= Width)
+        {
+            throw new ArgumentException($"Horizontal offset must be between 0 and {Width - 1}", nameof(x));
+        }
+
+        if (y < 0 || y >= Height)
+        {
+            throw new ArgumentException($"Vertical offset must be between 0 and {Height - 1}", nameof(y));
         }
     }
 }

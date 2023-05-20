@@ -10,20 +10,20 @@ public interface IKeyboard
 [Flags]
 public enum Key
 {
-    Key0,
-    Key1,
-    Key2,
-    Key3,
-    Key4,
-    Key5,
-    Key6,
-    Key7,
-    Key8,
-    Key9,
-    KeyA,
-    KeyB,
-    KeyC,
-    KeyD,
-    KeyE,
-    KeyF
+    Key0 = 1,
+    Key1 = 2,
+    Key2 = 4,
+    Key3 = 8,
+    Key4 = 16,
+    Key5 = 32,
+    Key6 = 64,
+    Key7 = 128,
+    Key8 = 256,
+    Key9 = 512,
+    KeyA = 1024,
+    KeyB = 2048,
+    KeyC = 4096,
+    KeyD = 8192,
+    KeyE = 16384,
+    KeyF = 32768
 }

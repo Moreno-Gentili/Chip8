@@ -1,7 +1,8 @@
 using Chip8.Model.Sprites;
 namespace Chip8.Sprites;
 
-// Each sprite is four pixels wide by five pixels tall.
+// Each font character is four pixels wide by five pixels tall.
+// Since the characters are 4 pixels wide but sprites are 8 pixels wide, I'll pad the other 4 pixels with zeros.
 public record DefaultFont : IFont
 {
     private Sprite[] digits = new Sprite[]
