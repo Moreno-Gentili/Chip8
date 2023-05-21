@@ -1,20 +1,27 @@
 using Chip8.Model.Components;
 using Chip8.Model.Sprites;
-using CommunityToolkit.HighPerformance;
 
 namespace Chip8.Components;
 
 public class FrameBuffer : IFrameBuffer
 {
-    private bool[,] buffer;
+    private readonly Memory<byte> memory;
 
-    public FrameBuffer()
+    public FrameBuffer(Memory<byte> memory)
     {
-        buffer = CreateBuffer();
+        if (memory.Length != MemorySize)
+        {
+            throw new ArgumentException($"Memory slice must be exatcly of size {MemorySize} bytes");
+        }
+
+        this.memory = memory;
+        Clear();
     }
 
     public byte Width => 64;
     public byte Height => 32;
+    private int MemoryWidth => Width / 8;
+    private int MemorySize => MemoryWidth * Height;
 
     public void Draw(ISprite sprite, byte x, byte y)
     {
@@ -29,7 +36,8 @@ public class FrameBuffer : IFrameBuffer
         {
             for (; y < upperY; y++)
             {
-                buffer[x, y] ^= sprite[Convert.ToByte(x - offsetX), Convert.ToByte(y - offsetY)];
+                bool value = sprite[Convert.ToByte(x - offsetX), Convert.ToByte(y - offsetY)];
+                XorPixel(x, y, value);
             }
         }
     }
@@ -39,18 +47,46 @@ public class FrameBuffer : IFrameBuffer
         get
         {
             EnsureCoordinatesAreWithinBounds(x, y);
-            return buffer[x, y];
+            return GetPixel(x, y);
         }
     }
     
     public void Clear()
     {
-        buffer = CreateBuffer();
+        for (int i = 0; i < MemorySize; i++)
+        {
+            memory.Span[i] = 0;
+        }
     }
 
-    private bool[,] CreateBuffer()
+    private bool GetPixel(byte x, byte y)
     {
-        return new bool[Width, Height];
+        int pixelPosition = GetPixelPosition(x, y);
+        byte pixelByte = memory.Span[pixelPosition];
+        byte mask = GetPixelMask(x, true);
+        return (pixelByte & mask) != 0;
+    }
+
+    private void XorPixel(byte x, byte y, bool value)
+    {
+        int bytePosition = GetPixelPosition(x, y);
+        byte mask = GetPixelMask(x, value);
+        memory.Span[bytePosition] ^= mask;
+    }
+
+    private int GetPixelPosition(byte x, byte y)
+    {
+        return (y * MemoryWidth) + (x / 8);
+    }
+
+    private byte GetPixelMask(byte x, bool value)
+    {
+        if (!value)
+        {
+            return byte.MinValue;
+        }
+
+        return Convert.ToByte(1 << (7 - (x % 8)));
     }
 
     private void EnsureCoordinatesAreWithinBounds(byte x, byte y)

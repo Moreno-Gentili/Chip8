@@ -3,33 +3,12 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Chip8.IO;
+using Chip8.Model.Components;
+using Chip8.Model.IO;
 
-namespace Chip8;
+namespace Chip8.Wpf.IO;
 
-public class Cassette : ICassette
-{
-    private string romPath = string.Empty;
-    public Cassette(string romPath)
-    {
-        Change(romPath);
-    }
-
-    public void Change(string romPath)
-    {
-        this.romPath = romPath;
-    }
-}
-
-public class Speaker : ISpeaker
-{
-    public void Beep(byte tone)
-    {
-        Console.Beep();
-    }
-}
-
-public class Monitor : Window, IMonitor
+public class Display : Window, IDisplay
 {
     private readonly DispatcherTimer timer;
     private const int Columns = 64;
@@ -40,7 +19,7 @@ public class Monitor : Window, IMonitor
     private readonly BitmapPalette bitmapPalette;
     private readonly BitmapSource? scanlines = null;
 
-    public Monitor(Color primaryColor, int scale = 6, float fps = 60f, bool drawScanlines = true)
+    public Display(Color primaryColor, int scale = 6, float fps = 60f, bool drawScanlines = true)
     {
         this.scale = scale;
         Width = Columns * scale + 15;
@@ -73,7 +52,7 @@ public class Monitor : Window, IMonitor
 
     private void Invalidate(object? sender, EventArgs e)
     {
-        this.InvalidateVisual();
+        InvalidateVisual();
     }
 
     protected override void OnRender(DrawingContext dc)
@@ -110,7 +89,7 @@ public class Monitor : Window, IMonitor
         var buffer = new byte[width * height];
         for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < height; y+=2)
+            for (int y = 0; y < height; y += 2)
             {
                 buffer[x + y * width] = 1;
             }
@@ -125,5 +104,10 @@ public class Monitor : Window, IMonitor
     {
         timer.Stop();
         base.OnClosing(e);
+    }
+
+    public void Show(IFrameBuffer frameBuffer)
+    {
+        
     }
 }

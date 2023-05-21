@@ -5,7 +5,8 @@ namespace Chip8.Tests;
 
 public class FrameBufferTests
 {
-    private Sprite sprite = new Sprite(0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+    private readonly Sprite sprite = new Sprite(0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+    private readonly Memory<byte> memory = new byte[64 * 32 / 8];
 
     [TestCase(64, 0)]
     [TestCase(65, 0)]
@@ -15,7 +16,7 @@ public class FrameBufferTests
     [TestCase(byte.MaxValue, byte.MaxValue)]
     public void Draw_ShouldThrow_WhenSpriteIsDrawnOutOfBounds(byte x, byte y)
     {
-        FrameBuffer frameBuffer = new();
+        FrameBuffer frameBuffer = new(memory);
         Assert.Throws<ArgumentException>(() => frameBuffer.Draw(sprite, x, y));
     }
 
@@ -24,7 +25,7 @@ public class FrameBufferTests
     [TestCase(63, 31)]
     public void Draw_ShouldSucceed_WhenSpriteIsCompletelyOrPartiallyInsideTheFrameBuffer(byte x, byte y)
     {
-        FrameBuffer frameBuffer = new();
+        FrameBuffer frameBuffer = new(memory);
         frameBuffer.Draw(sprite, x, y);
 
         byte upperX = Convert.ToByte(Math.Min(x + sprite.Width, frameBuffer.Width));

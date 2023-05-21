@@ -10,6 +10,7 @@ public interface IKeyboard
 [Flags]
 public enum Key
 {
+    None = 0,
     Key0 = 1,
     Key1 = 2,
     Key2 = 4,
