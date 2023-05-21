@@ -1,37 +1,62 @@
 using Chip8.Model.IO;
 using Chip8.Components;
 using Chip8.Model;
-using PrecisionTiming;
 using Chip8.Model.Components;
 
 namespace Chip8;
 
 public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
 {
-    // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
-
-    private readonly PrecisionTimer timer;
-    private byte[] memory = new byte[4096];
-    private int cyclesPerTick = 8;
-    private FrameBuffer frameBuffer;
-    private Stack stack;
-    private IRegister<byte>[] registerVx;
+    // Components
+    private IMemory memory;
+    private IFrameBuffer frameBuffer;
+    private IStack stack;
+    private ITimer delayTimer;
+    private ITimer soundTimer;
+    private IRegister<byte>[] registersVx;
     private IRegister<ushort> registerI;
+    private IProcessor processor;
 
-    private ICassette? cassette;
-    private IKeyboard? keyboard;
-    private IDisplay? display;
-    private ISpeaker? speaker;
+    // IO
+    private readonly ICassette cassette;
+    private readonly IKeyboard keyboard;
+    private readonly IDisplay display;
+    private readonly ISpeaker speaker;
+    private readonly IClock clock;
+    
+    // Speed
+    private int cyclesPerTick = 8;
 
-    static VirtualMachine()
+    public VirtualMachine(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock)
     {
-        PrecisionTimerSettings.SetMinimumTimerResolution(0);
+        int accessibleMemorySize = 4 * 1024, // 4kB buffer
+            frameBufferSize = 64 * 32 / 8,   // 64 by 32 pixels, 1 bit per pixel
+            stackSize = 16 * 2,              // 16 nested levels of 16 bits each 
+            registersVxSize = 16 * 1,        // 16 Vx registers, 1 byte each
+            registerISize = 1 * 2,           // 1 I register, 2 bytes
+            programCounterSize = 1 * 2,      // 1 pseudo register, 2 bytes
+            stackPointerSize = 1 * 1;        // 1 pointer, 1 byte
+
+    // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
+    Memory<byte> buffer = new byte[accessibleMemorySize + frameBufferSize + stackSize + registersVxSize + registerISize + programCounterSize + stackPointerSize];
+    memory = new Memory(Slice(buffer, accessibleMemorySize));
+    
+    frameBuffer = new FrameBuffer(memory.Slice(position, frameBufferSize));
+
+    position += frameBufferSize;
+    stack = new Stack(memory.Slice(position += FrameBufferSize, StackSize));
+
+        Enumerable.Range(0, RegistersS).Select(r => new Register<byte>(memory.Slice(position + (int)r))).ToArray();
+        
+        registers = this;
+        timers = this;
     }
 
-    public VirtualMachine()
+    private Memory<byte> Slice(ref Memory<byte> buffer, int length)
     {
-        stack = new Stack();
-        timer = CreateTimer();
+        Memory<byte> slice = buffer.Slice(0, length);
+        buffer = buffer.Slice(length);
+        return slice;
     }
 
     public ITimer SoundTimer => throw new NotImplementedException();
@@ -69,13 +94,12 @@ public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
         }
     }
 
-    public void Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker)
+    public static IVirtualMachine Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock, int cyclesPerTick = 8)
     {
-        this.cassette = cassette;
-        this.keyboard = keyboard;
-        this.display = display;
-        this.speaker = speaker;
-        Resume();
+        VirtualMachine vm = new(cassette, keyboard, display, speaker, clock);
+        vm.SetSpeed(cyclesPerTick);
+        vm.Resume();
+        return vm;
     }
 
     public void SetSpeed(int cyclesPerTick)
@@ -100,6 +124,10 @@ public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
 
     private void ExecuteCycles()
     {
-
+        IOpcode? opcode = null;
+        do
+        {
+            opcode = processor.ExecuteCycle(memory, frameBuffer, stack, registers, timers, keyboard, speaker)
+        }
     }
 }

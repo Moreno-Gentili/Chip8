@@ -8,5 +8,5 @@ public class Keyboard : IKeyboard
     {
     }
 
-    public Key PressedKeys => Key.None;
+    public Key? PressedKey => null;
 }

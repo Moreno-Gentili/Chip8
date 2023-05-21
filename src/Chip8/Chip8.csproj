@@ -1,10 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="PrecisionTimer.NET" Version="2.2.4.9" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Chip8.Model\Chip8.Model.csproj" />
   </ItemGroup>
 

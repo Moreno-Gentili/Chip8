@@ -1,12 +1,10 @@
-using Chip8.Model.IO;
-
 namespace Chip8.Model.Components;
 
 public interface IMemory
 {
-    void SetCurrentPosition(ushort address);
-    Span<byte> ReadFromCurrentPostion(ushort length);
-    void WriteToCurrentPostion(byte[] buffer);
+    Memory<byte> Read(ushort offset, ushort length);
+
+    void Write(ushort offset, Memory<byte> data);
 
     /*
     +---------------+= 0xFFF (4095) End of Chip-8 RAM

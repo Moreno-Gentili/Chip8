@@ -1,6 +1,7 @@
 namespace Chip8.Model.Components;
 
-public interface ITimer
+public interface ITimers
 {
-    event EventHandler Tick;
+    ITimer SoundTimer { get; }
+    ITimer DelayTimer { get; }
 }

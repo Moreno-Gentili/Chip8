@@ -4,27 +4,25 @@ namespace Chip8.Model.IO;
 // This is the only input type the user has access to.
 public interface IKeyboard
 {
-    Key PressedKeys { get; }
+    Key? PressedKey { get; }
 }
 
-[Flags]
 public enum Key
 {
-    None = 0,
-    Key0 = 1,
-    Key1 = 2,
-    Key2 = 4,
-    Key3 = 8,
-    Key4 = 16,
-    Key5 = 32,
-    Key6 = 64,
-    Key7 = 128,
-    Key8 = 256,
-    Key9 = 512,
-    KeyA = 1024,
-    KeyB = 2048,
-    KeyC = 4096,
-    KeyD = 8192,
-    KeyE = 16384,
-    KeyF = 32768
+    Key0 = 0,
+    Key1 = 1,
+    Key2 = 2,
+    Key3 = 3,
+    Key4 = 4,
+    Key5 = 5,
+    Key6 = 6,
+    Key7 = 7,
+    Key8 = 8,
+    Key9 = 9,
+    KeyA = 10,
+    KeyB = 11,
+    KeyC = 12,
+    KeyD = 13,
+    KeyE = 14,
+    KeyF = 15
 }

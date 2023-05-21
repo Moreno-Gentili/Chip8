@@ -4,21 +4,20 @@ namespace Chip8.Components;
 
 public class Memory : IMemory
 {
-    private ushort currentPosition = 0;
-    private readonly byte[] buffer = new byte[4096];
+    private readonly Memory<byte> buffer;
 
-    public Span<byte> ReadFromCurrentPostion(ushort length)
+    public Memory(Memory<byte> buffer)
     {
-        return ((Span<byte>)buffer)[currentPosition..length];
+        this.buffer = buffer;
     }
 
-    public void SetCurrentPosition(ushort address)
+    public Memory<byte> Read(ushort offset, ushort length)
     {
-        currentPosition = address;
+        return buffer.Slice(offset, length);
     }
 
-    public void WriteToCurrentPostion(byte[] data)
+    public void Write(ushort offset, Memory<byte> data)
     {
-        Array.Copy(data, buffer, data.Length);
+        data.CopyTo(buffer[offset..]);
     }
 }

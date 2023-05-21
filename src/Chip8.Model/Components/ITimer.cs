@@ -1,7 +1,7 @@
 namespace Chip8.Model.Components;
 
-public interface ITimers
+public interface ITimer
 {
-    ITimer SoundTimer { get; }
-    ITimer DelayTimer { get; }
+    byte GetValue();
+    void SetValue(byte value);
 }
