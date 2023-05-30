@@ -8,6 +8,9 @@ public interface IRegisters
     // There is also a 16-bit register called I.
     // This register is generally used to store memory addresses, so only the lowest (rightmost) 12 bits are usually used.
     IRegister<ushort> GetI();
+
+    IRegister<ushort> GetProgramCounter();
+    IRegister<byte> GetStackPointer();
 }
 
 public enum RegisterVx

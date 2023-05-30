@@ -1,4 +1,5 @@
 using Chip8.Components;
+using Chip8.Model.Components;
 using Chip8.Sprites;
 
 namespace Chip8.Tests;
@@ -25,7 +26,7 @@ public class FrameBufferTests
     [TestCase(63, 31)]
     public void Draw_ShouldSucceed_WhenSpriteIsCompletelyOrPartiallyInsideTheFrameBuffer(byte x, byte y)
     {
-        FrameBuffer frameBuffer = new(memory);
+        IFrameBuffer frameBuffer = new FrameBuffer(memory);
         frameBuffer.Draw(sprite, x, y);
 
         byte upperX = Convert.ToByte(Math.Min(x + sprite.Width, frameBuffer.Width));

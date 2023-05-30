@@ -1,57 +1,59 @@
+using Chip8.Components.Base;
+using Chip8.Extensions;
 using Chip8.Model.Components;
 using Chip8.Model.IO;
 
 namespace Chip8.Components;
 
-public class SoundTimer : ITimer
+public class SoundTimer : MemoryComponent, ITimer
 {
-    private const int Length = 1;
-    private readonly Memory<byte> buffer;
     private readonly IClock clock;
     private readonly ISpeaker speaker;
 
-    public SoundTimer(Memory<byte> buffer, IClock clock, ISpeaker speaker)
+    public SoundTimer(Memory<byte> memory, IClock clock, ISpeaker speaker)
+        : base(memory, MemorySize)
     {
-        if (buffer.Length > 1)
-        {
-            throw new ArgumentException($"Length must be {Length}", nameof(buffer));
-        }
-
         this.clock = clock;
-        this.buffer = buffer;
         this.speaker = speaker;
+    }
+
+    public static int MemorySize = sizeof(byte);
+
+    internal static ITimer From(Memory<byte> memory, IClock clock, ISpeaker speaker)
+    {
+        return new SoundTimer(memory.Chunk(MemorySize), clock, speaker);
     }
 
     public byte GetValue()
     {
-        return buffer.Span[0];
+        return memory.Span[0];
     }
 
     public void SetValue(byte value)
     {
         if (value > 0)
         {
-            if (buffer.Span[0] == 0)
+            if (memory.Span[0] == 0)
             {
                 Activate();
             }
 
-            buffer.Span[0] = value;
+            memory.Span[0] = value;
         }
         else
         {
-            if (buffer.Span[0] > 0)
+            if (memory.Span[0] > 0)
             {
                 Deactivate();
             }
 
-            buffer.Span[0] = value;
+            memory.Span[0] = value;
         }
     }
 
     private void Decrement(object? sender, TimeSpan elapsed)
     {
-        SetValue(Convert.ToByte(buffer.Span[0] - 1));
+        SetValue(Convert.ToByte(memory.Span[0] - 1));
     }
 
     private void Activate()

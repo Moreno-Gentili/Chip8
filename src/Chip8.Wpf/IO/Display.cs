@@ -10,25 +10,21 @@ namespace Chip8.Wpf.IO;
 
 public class Display : Window, IDisplay
 {
-    private readonly DispatcherTimer timer;
     private const int Columns = 64;
     private const int Rows = 32;
-    private readonly int scale;
     private readonly byte[] buffer;
     private readonly Rect rectangle;
     private readonly BitmapPalette bitmapPalette;
     private readonly BitmapSource? scanlines = null;
 
-    public Display(Color primaryColor, int scale = 6, float fps = 60f, bool drawScanlines = true)
+    public Display(Color primaryColor, int scale = 6, bool drawScanlines = true)
     {
-        this.scale = scale;
         Width = Columns * scale + 15;
         Height = Rows * scale + 36;
         rectangle = new Rect(0, 0, Columns * scale, Rows * scale);
         ResizeMode = ResizeMode.NoResize;
         BorderThickness = new Thickness(0);
         Background = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
-        timer = CreateTimer(fps);
         bitmapPalette = new BitmapPalette(new List<Color> { Color.FromRgb(0, 0, 0), primaryColor });
         buffer = new byte[Columns * Rows];
         RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.NearestNeighbor);
@@ -41,31 +37,8 @@ public class Display : Window, IDisplay
         }
     }
 
-    private DispatcherTimer CreateTimer(float fps)
-    {
-        DispatcherTimer dispatcherTimer = new();
-        dispatcherTimer.Tick += new EventHandler(Invalidate);
-        dispatcherTimer.Interval = TimeSpan.FromMilliseconds(1000 / fps);
-        dispatcherTimer.Start();
-        return dispatcherTimer;
-    }
-
-    private void Invalidate(object? sender, EventArgs e)
-    {
-        InvalidateVisual();
-    }
-
     protected override void OnRender(DrawingContext dc)
     {
-        var random = new Random();
-        for (int x = 0; x < Columns; x++)
-        {
-            for (int y = 0; y < Rows; y++)
-            {
-                buffer[x + y * Columns] = Convert.ToByte(random.Next(0, 2));
-            }
-        }
-
         BitmapSource pixels = GetImage(buffer, bitmapPalette, Columns, Rows);
         dc.DrawImage(pixels, rectangle);
         if (scanlines is not null)
@@ -100,14 +73,16 @@ public class Display : Window, IDisplay
         return scanlines;
     }
 
-    protected override void OnClosing(CancelEventArgs e)
-    {
-        timer.Stop();
-        base.OnClosing(e);
-    }
-
     public void Show(IFrameBuffer frameBuffer)
     {
-        
+        for (byte x = 0; x < frameBuffer.Width; x++)
+        {
+            for (byte y = 0; y < frameBuffer.Height; y++)
+            {
+                buffer[x + y * frameBuffer.Width] = Convert.ToByte(frameBuffer[x, y] ? 1 : 0);
+            }
+        }
+
+        InvalidateVisual();
     }
 }

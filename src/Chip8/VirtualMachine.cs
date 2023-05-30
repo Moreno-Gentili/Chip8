@@ -5,16 +5,14 @@ using Chip8.Model.Components;
 
 namespace Chip8;
 
-public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
+public class VirtualMachine : IVirtualMachine
 {
     // Components
-    private IMemory memory;
+    private IAddressableMemory addressableMemory;
     private IFrameBuffer frameBuffer;
     private IStack stack;
-    private ITimer delayTimer;
-    private ITimer soundTimer;
-    private IRegister<byte>[] registersVx;
-    private IRegister<ushort> registerI;
+    private IRegisters registers;
+    private ITimers timers;
     private IProcessor processor;
 
     // IO
@@ -22,63 +20,28 @@ public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
     private readonly IKeyboard keyboard;
     private readonly IDisplay display;
     private readonly ISpeaker speaker;
-    private readonly IClock clock;
     
     // Speed
     private int cyclesPerTick = 8;
 
     public VirtualMachine(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock)
     {
-        int accessibleMemorySize = 4 * 1024, // 4kB buffer
-            frameBufferSize = 64 * 32 / 8,   // 64 by 32 pixels, 1 bit per pixel
-            stackSize = 16 * 2,              // 16 nested levels of 16 bits each 
-            registersVxSize = 16 * 1,        // 16 Vx registers, 1 byte each
-            registerISize = 1 * 2,           // 1 I register, 2 bytes
-            programCounterSize = 1 * 2,      // 1 pseudo register, 2 bytes
-            stackPointerSize = 1 * 1;        // 1 pointer, 1 byte
-
-    // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
-    Memory<byte> buffer = new byte[accessibleMemorySize + frameBufferSize + stackSize + registersVxSize + registerISize + programCounterSize + stackPointerSize];
-    memory = new Memory(Slice(buffer, accessibleMemorySize));
-    
-    frameBuffer = new FrameBuffer(memory.Slice(position, frameBufferSize));
-
-    position += frameBufferSize;
-    stack = new Stack(memory.Slice(position += FrameBufferSize, StackSize));
-
-        Enumerable.Range(0, RegistersS).Select(r => new Register<byte>(memory.Slice(position + (int)r))).ToArray();
+        // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
+        Memory<byte> memory = new byte[AddressableMemory.MemorySize + FrameBuffer.MemorySize + Stack.MemorySize + Registers.MemorySize + Timers.MemorySize];
+        addressableMemory = AddressableMemory.From(memory);
+        frameBuffer = FrameBuffer.From(memory);
+        stack = Stack.From(memory);
+        registers = Registers.From(memory);
+        timers = Timers.From(memory, clock, speaker);
         
-        registers = this;
-        timers = this;
-    }
+        processor = new Processor();
 
-    private Memory<byte> Slice(ref Memory<byte> buffer, int length)
-    {
-        Memory<byte> slice = buffer.Slice(0, length);
-        buffer = buffer.Slice(length);
-        return slice;
-    }
+        this.cassette = cassette;
+        this.keyboard = keyboard;
+        this.display = display;
+        this.speaker = speaker;
 
-    public ITimer SoundTimer => throw new NotImplementedException();
-
-    public ITimer DelayTimer => throw new NotImplementedException();
-
-    public IRegister<ushort> GetI()
-    {
-        throw new NotImplementedException();
-    }
-
-    public IRegister<byte> GetVx(RegisterVx name)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Pause()
-    {
-        if (timer.IsRunning())
-        {
-            timer.Stop();
-        }
+        clock.Tick += ExecuteCycles;
     }
 
     public void Reset()
@@ -86,19 +49,10 @@ public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
         throw new NotImplementedException();
     }
 
-    public void Resume()
-    {
-        if (!timer.IsRunning())
-        {
-            timer.Start();
-        }
-    }
-
     public static IVirtualMachine Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock, int cyclesPerTick = 8)
     {
         VirtualMachine vm = new(cassette, keyboard, display, speaker, clock);
         vm.SetSpeed(cyclesPerTick);
-        vm.Resume();
         return vm;
     }
 
@@ -112,22 +66,26 @@ public class VirtualMachine : IVirtualMachine, IRegisters, ITimers
         this.cyclesPerTick = cyclesPerTick;
     }
 
-    private PrecisionTimer CreateTimer()
+    private void ExecuteCycles(object? sender, TimeSpan elapsed)
     {
-        PrecisionTimer timer = new();
-        timer.SetAction(ExecuteCycles);
-        timer.SetPeriod(1000 / 60);
-        timer.SetAutoResetMode(true);
-
-        return timer;
-    }
-
-    private void ExecuteCycles()
-    {
-        IOpcode? opcode = null;
-        do
+        bool shouldRedraw = true;
+        for (int i = 0; i < cyclesPerTick; i++)
         {
-            opcode = processor.ExecuteCycle(memory, frameBuffer, stack, registers, timers, keyboard, speaker)
+            IOpcode? opcode = processor.ExecuteCycle(addressableMemory, frameBuffer, stack, registers, timers, keyboard, speaker);
+            if (opcode is null)
+            {
+                break;
+            }
+
+            shouldRedraw = true;
+        }
+
+        if (shouldRedraw)
+        {
+
+            frameBuffer.Draw(new Sprites.DefaultFont().Digit9, 0, 0);
+            bool zero = frameBuffer[0, 0];
+            display.Show(frameBuffer);
         }
     }
 }

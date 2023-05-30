@@ -1,6 +1,6 @@
 namespace Chip8.Model.Components;
 
-public interface IMemory
+public interface IAddressableMemory
 {
     Memory<byte> Read(ushort offset, ushort length);
 

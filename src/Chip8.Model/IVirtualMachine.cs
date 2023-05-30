@@ -6,7 +6,5 @@ public interface IVirtualMachine
 {
     static abstract IVirtualMachine Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock, int cyclesPerTick = 8);
     void SetSpeed(int cyclesPerTick);
-    void Pause();
-    void Resume();
     void Reset();
 }

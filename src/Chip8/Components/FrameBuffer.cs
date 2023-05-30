@@ -1,27 +1,29 @@
+using Chip8.Components.Base;
+using Chip8.Extensions;
 using Chip8.Model.Components;
 using Chip8.Model.Sprites;
 
 namespace Chip8.Components;
 
-public class FrameBuffer : IFrameBuffer
+public class FrameBuffer : MemoryComponent, IFrameBuffer
 {
-    private readonly Memory<byte> memory;
-
     public FrameBuffer(Memory<byte> memory)
+        : base(memory, MemorySize)
     {
-        if (memory.Length != MemorySize)
-        {
-            throw new ArgumentException($"Memory slice must be exatcly of size {MemorySize} bytes");
-        }
-
-        this.memory = memory;
         Clear();
     }
 
-    public byte Width => 64;
-    public byte Height => 32;
-    private int MemoryWidth => Width / 8;
-    private int MemorySize => MemoryWidth * Height;
+    public static int MemorySize => WidthInBytes * Height;
+    private static byte Width => 64;
+    private static byte Height => 32;
+    private static int WidthInBytes => Width / 8;
+    int IFrameBuffer.Width => Width;
+    int IFrameBuffer.Height => Height;
+
+    internal static FrameBuffer From(Memory<byte> memory)
+    {
+        return new FrameBuffer(memory.Chunk(MemorySize));
+    }
 
     public void Draw(ISprite sprite, byte x, byte y)
     {
@@ -32,6 +34,7 @@ public class FrameBuffer : IFrameBuffer
         byte upperX = Convert.ToByte(Math.Min(x + sprite.Width, Width));
         byte upperY = Convert.ToByte(Math.Min(y + sprite.Height, Height));
 
+        // TODO: there is something wrong here and in the sprite indexer
         for (; x < upperX; x++)
         {
             for (; y < upperY; y++)
@@ -76,7 +79,7 @@ public class FrameBuffer : IFrameBuffer
 
     private int GetPixelPosition(byte x, byte y)
     {
-        return (y * MemoryWidth) + (x / 8);
+        return (y * WidthInBytes) + (x / 8);
     }
 
     private byte GetPixelMask(byte x, bool value)

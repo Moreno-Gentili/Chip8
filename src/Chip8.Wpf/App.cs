@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows;
 using System.Windows.Media;
+using Chip8.Model;
 using Chip8.Wpf.IO;
 
 namespace Chip8;
@@ -26,11 +27,11 @@ public class App : Application
         Cassette cassette = new(romPath);
         Keyboard keyboard = new();
         Speaker speaker = new();
-        Display display = new(scale: 6, fps: 60, drawScanlines: true, primaryColor: Color.FromRgb(10, 235, 0));
+        Clock clock = new(fps: 60);
+        Display display = new(scale: 6, drawScanlines: true, primaryColor: Color.FromRgb(10, 235, 0));
         
-        VirtualMachine vm = new();
+        IVirtualMachine vm = VirtualMachine.Run(cassette, keyboard, display, speaker, clock);
         // vm.Run(cassette, keyboard, display, speaker);
-        Stopwatch sw = new Stopwatch();
 
         MainWindow = display;
         MainWindow.Show();

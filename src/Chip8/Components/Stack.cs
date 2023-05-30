@@ -1,20 +1,21 @@
+using Chip8.Components.Base;
+using Chip8.Extensions;
 using Chip8.Model.Components;
 
 namespace Chip8.Components;
 
-public class Stack : IStack
+public class Stack : MemoryComponent, IStack
 {
-    private const int Length = 16 * 2;
-    private readonly Memory<byte> buffer;
-
-    public Stack(Memory<byte> buffer)
+    public Stack(Memory<byte> memory)
+        : base(memory, MemorySize)
     {
-        if (buffer.Length != Length)
-        {
-            throw new ArgumentException($"Length must be {Length}", nameof(buffer));
-        }
+    }
 
-        this.buffer = buffer;
+    public static int MemorySize = 16 * sizeof(ushort);
+
+    internal static Stack From(Memory<byte> memory)
+    {
+        return new Stack(memory.Chunk(MemorySize));
     }
 
     public void Push(byte level, ushort address)

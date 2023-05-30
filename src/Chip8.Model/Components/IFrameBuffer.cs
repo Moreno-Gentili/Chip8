@@ -8,4 +8,6 @@ public interface IFrameBuffer
     void Draw(ISprite sprite, byte x, byte y);
     void Clear();
     bool this[byte x, byte y] { get; }
+    int Width { get; }
+    int Height { get; }
 }

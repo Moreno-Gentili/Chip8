@@ -1,3 +1,5 @@
+using Chip8.Components.Base;
+using Chip8.Extensions;
 using Chip8.Model.Components;
 using Chip8.Model.IO;
 
@@ -5,46 +7,47 @@ namespace Chip8.Components;
 
 // The delay timer is active whenever the DT register is non-zero, when active it will keep decrementing itself at a rate of 60 Hz until it is zero again.
 // When zero, it will deactivate itself, not decrementing anymore.
-public class DelayTimer : ITimer
+public class DelayTimer : MemoryComponent, ITimer
 {
-    private const int Length = 1;
-    private readonly Memory<byte> buffer;
     private readonly IClock clock;
-    public DelayTimer(Memory<byte> buffer, IClock clock)
-    {
-        if (buffer.Length > 1)
-        {
-            throw new ArgumentException($"Length must be {Length}", nameof(buffer));
-        }
 
+    public DelayTimer(Memory<byte> memory, IClock clock)
+        : base(memory, MemorySize)
+    {
         this.clock = clock;
-        this.buffer = buffer;
+    }
+
+    public static int MemorySize = sizeof(byte);
+
+    internal static ITimer From(Memory<byte> memory, IClock clock)
+    {
+        return new DelayTimer(memory.Chunk(MemorySize), clock);
     }
 
     public byte GetValue()
     {
-        return buffer.Span[0];
+        return memory.Span[0];
     }
 
     public void SetValue(byte value)
     {
         if (value > 0)
         {
-            if (buffer.Span[0] == 0)
+            if (memory.Span[0] == 0)
             {
                 Activate();
             }
 
-            buffer.Span[0] = value;
+            memory.Span[0] = value;
         }
         else
         {
-            if (buffer.Span[0] > 0)
+            if (memory.Span[0] > 0)
             {
                 Deactivate();
             }
 
-            buffer.Span[0] = value;
+            memory.Span[0] = value;
         }
     }
 
@@ -60,6 +63,6 @@ public class DelayTimer : ITimer
 
     private void Decrement(object? sender, TimeSpan elapsed)
     {
-        SetValue(Convert.ToByte(buffer.Span[0] - 1));
+        SetValue(Convert.ToByte(memory.Span[0] - 1));
     }
 }
