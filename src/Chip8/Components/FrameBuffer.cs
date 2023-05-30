@@ -34,10 +34,9 @@ public class FrameBuffer : MemoryComponent, IFrameBuffer
         byte upperX = Convert.ToByte(Math.Min(x + sprite.Width, Width));
         byte upperY = Convert.ToByte(Math.Min(y + sprite.Height, Height));
 
-        // TODO: there is something wrong here and in the sprite indexer
-        for (; x < upperX; x++)
+        for (x = offsetX; x < upperX; x++)
         {
-            for (; y < upperY; y++)
+            for (y = offsetY; y < upperY; y++)
             {
                 bool value = sprite[Convert.ToByte(x - offsetX), Convert.ToByte(y - offsetY)];
                 XorPixel(x, y, value);

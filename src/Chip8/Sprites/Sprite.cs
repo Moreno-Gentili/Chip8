@@ -24,7 +24,7 @@ public class Sprite : ISprite
         get
         {
             EnsureCoordinatesAreWithinBounds(x, y);
-            return (lines[y] & (1 << x)) != 0;
+            return (lines[y] & (1 << (7 - x))) != 0;
         }
     }
 

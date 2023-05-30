@@ -68,23 +68,19 @@ public class VirtualMachine : IVirtualMachine
 
     private void ExecuteCycles(object? sender, TimeSpan elapsed)
     {
-        bool shouldRedraw = true;
-        for (int i = 0; i < cyclesPerTick; i++)
+        bool shouldRedraw = false;
+
+        for (int i = 0; i < cyclesPerTick; i++, shouldRedraw = true)
         {
             IOpcode? opcode = processor.ExecuteCycle(addressableMemory, frameBuffer, stack, registers, timers, keyboard, speaker);
             if (opcode is null)
             {
                 break;
             }
-
-            shouldRedraw = true;
         }
 
         if (shouldRedraw)
         {
-
-            frameBuffer.Draw(new Sprites.DefaultFont().Digit9, 0, 0);
-            bool zero = frameBuffer[0, 0];
             display.Show(frameBuffer);
         }
     }
