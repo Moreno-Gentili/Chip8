@@ -6,16 +6,16 @@ namespace Chip8.Components;
 
 public class Registers : MemoryComponent, IRegisters
 {
-    private readonly IRegister<ushort> i;
-    private readonly IRegister<byte>[] vx;
-    private readonly IRegister<ushort> programCounter;
-    private readonly IRegister<byte> stackPointer;
+    private readonly IRegisterI i;
+    private readonly Dictionary<RegisterName, IRegisterV> vx;
+    private readonly IProgramCounter programCounter;
+    private readonly IStackPointer stackPointer;
 
     public Registers(Memory<byte> memory)
         : base(memory, MemorySize)
     {
         i = Register16.From(memory);
-        vx = Enumerable.Range(0, VxCount).Select(i => Register8.From(memory)).ToArray();
+        vx = Enumerable.Range(0, VxCount).ToDictionary(i => (RegisterName)i, i => (IRegisterV)Register8.From(memory));
         programCounter = Register16.From(memory);
         stackPointer = Register8.From(memory);
     }
@@ -32,9 +32,9 @@ public class Registers : MemoryComponent, IRegisters
         return new Registers(memory.Chunk(MemorySize));
     }
 
-    public IRegister<byte> GetVx(RegisterVx name) => vx[(int)name];
-    public IRegister<ushort> GetI() => i;
-    public IRegister<ushort> GetProgramCounter() => programCounter;
-    public IRegister<byte> GetStackPointer() => stackPointer;
+    public IDictionary<RegisterName, IRegisterV> V => vx;
+    public IRegisterI I => i;
+    public IProgramCounter ProgramCounter => programCounter;
+    public IStackPointer StackPointer => stackPointer;
 }
 

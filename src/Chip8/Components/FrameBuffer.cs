@@ -25,23 +25,24 @@ public class FrameBuffer : MemoryComponent, IFrameBuffer
         return new FrameBuffer(memory.Chunk(MemorySize));
     }
 
-    public void Draw(ISprite sprite, byte x, byte y)
+    public DrawResult Draw(ISprite sprite, byte x, byte y)
     {
-        EnsureCoordinatesAreWithinBounds(x, y);
-
-        byte offsetX = x;
-        byte offsetY = y;
-        byte upperX = Convert.ToByte(Math.Min(x + sprite.Width, Width));
-        byte upperY = Convert.ToByte(Math.Min(y + sprite.Height, Height));
+        byte offsetX = Convert.ToByte(x % Width);
+        byte offsetY = Convert.ToByte(y % Height);
+        byte upperX = Convert.ToByte(Math.Min(offsetX + sprite.Width, Width));
+        byte upperY = Convert.ToByte(Math.Min(offsetY + sprite.Height, Height));
+        bool atLeastOneFlipped = false;
 
         for (x = offsetX; x < upperX; x++)
         {
             for (y = offsetY; y < upperY; y++)
             {
                 bool value = sprite[Convert.ToByte(x - offsetX), Convert.ToByte(y - offsetY)];
-                XorPixel(x, y, value);
+                atLeastOneFlipped |= XorPixel(x, y, value);
             }
         }
+
+        return atLeastOneFlipped ? DrawResult.AtLeastOneFlipped : DrawResult.NoneFlipped;
     }
 
     public bool this[byte x, byte y]
@@ -69,11 +70,14 @@ public class FrameBuffer : MemoryComponent, IFrameBuffer
         return (pixelByte & mask) != 0;
     }
 
-    private void XorPixel(byte x, byte y, bool value)
+    private bool XorPixel(byte x, byte y, bool value)
     {
         int bytePosition = GetPixelPosition(x, y);
         byte mask = GetPixelMask(x, value);
+        bool flipped = value && ((memory.Span[bytePosition] & mask) != 0);
         memory.Span[bytePosition] ^= mask;
+
+        return flipped;
     }
 
     private int GetPixelPosition(byte x, byte y)
@@ -93,12 +97,12 @@ public class FrameBuffer : MemoryComponent, IFrameBuffer
 
     private void EnsureCoordinatesAreWithinBounds(byte x, byte y)
     {
-        if (x < 0 || x >= Width)
+        if (x >= Width)
         {
             throw new ArgumentException($"Horizontal offset must be between 0 and {Width - 1}", nameof(x));
         }
 
-        if (y < 0 || y >= Height)
+        if (y >= Height)
         {
             throw new ArgumentException($"Vertical offset must be between 0 and {Height - 1}", nameof(y));
         }

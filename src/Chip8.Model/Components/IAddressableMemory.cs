@@ -1,11 +1,13 @@
+using Chip8.Model.IO;
+
 namespace Chip8.Model.Components;
 
 public interface IAddressableMemory
 {
-    Memory<byte> Read(ushort offset, ushort length);
+    Memory<byte> Read(IRegister<ushort> position, ushort length);
 
-    void Write(ushort offset, Memory<byte> data);
-
+    void Write(IRegister<ushort> position, Memory<byte> data);
+    
     /*
     +---------------+= 0xFFF (4095) End of Chip-8 RAM
     |               |

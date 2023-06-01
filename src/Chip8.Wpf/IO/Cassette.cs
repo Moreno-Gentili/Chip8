@@ -16,7 +16,7 @@ public class Cassette : ICassette
         this.romPath = romPath;
     }
 
-    public byte[] Load()
+    public Memory<byte> Load()
     {
         return File.ReadAllBytes(romPath);
     }

@@ -4,27 +4,34 @@ namespace Chip8.Sprites;
 public class Sprite : ISprite
 {
     private const int maxHeight = 15;
-    private byte[] lines;
+    private Memory<byte> rows;
 
-    public Sprite(params byte[] lines)
+    public Sprite(Memory<byte> rows)
     {
-        if (lines.Length is 0 or > maxHeight)
+        if (rows.Length is 0 or > maxHeight)
         {
-            throw new ArgumentException($"Sprites must have an height between 1 and {maxHeight}", nameof(lines));
+            throw new ArgumentException($"Sprites must have an height between 1 and {maxHeight}", nameof(rows));
         }
 
-        this.lines = lines;
+        this.rows = rows;
+    }
+    
+    public Sprite(params byte[] rows)
+        : this((Memory<byte>)rows)
+    {        
     }
 
     public byte Width => 8;
-    public byte Height => Convert.ToByte(lines.Length);
+    public byte Height => Convert.ToByte(rows.Length);
+
+    public Memory<byte> Memory => rows;
 
     public bool this[byte x, byte y]
     {
         get
         {
             EnsureCoordinatesAreWithinBounds(x, y);
-            return (lines[y] & (1 << (7 - x))) != 0;
+            return (rows.Span[y] & (1 << (7 - x))) != 0;
         }
     }
 

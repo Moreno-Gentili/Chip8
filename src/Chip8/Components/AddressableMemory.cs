@@ -12,9 +12,9 @@ public class AddressableMemory : MemoryComponent, IAddressableMemory
     }
 
     public static int MemorySize = 4096 * sizeof(byte);
-    public Memory<byte> Read(ushort offset, ushort length)
+    public Memory<byte> Read(IRegister<ushort> position, ushort length)
     {
-        return memory.Slice(offset, length);
+        return memory.Slice(position.GetValue(), length);
     }
 
     internal static AddressableMemory From(Memory<byte> memory)
@@ -22,8 +22,8 @@ public class AddressableMemory : MemoryComponent, IAddressableMemory
         return new AddressableMemory(memory.Chunk(MemorySize));
     }
 
-    public void Write(ushort offset, Memory<byte> data)
+    public void Write(IRegister<ushort> position, Memory<byte> data)
     {
-        data.CopyTo(memory[offset..]);
+        data.CopyTo(memory[position.GetValue()..]);
     }
 }

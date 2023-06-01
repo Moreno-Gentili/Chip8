@@ -1,6 +1,7 @@
 using Chip8.Components.Base;
 using Chip8.Extensions;
 using Chip8.Model.Components;
+using System.Net;
 
 namespace Chip8.Components;
 
@@ -18,8 +19,15 @@ public class Stack : MemoryComponent, IStack
         return new Stack(memory.Chunk(MemorySize));
     }
 
-    public void Push(byte level, ushort address)
+    public void SetAddress(IStackPointer stackPointer, ushort address)
     {
-        throw new NotImplementedException();
+        byte position = stackPointer.GetValue();
+        BitConverter.GetBytes(address).CopyTo(memory[position..]);
+    }
+
+    public ushort GetAddress(IStackPointer stackPointer)
+    {
+        byte position = stackPointer.GetValue();
+        return BitConverter.ToUInt16(memory[position..(position+sizeof(ushort))].Span);
     }
 }

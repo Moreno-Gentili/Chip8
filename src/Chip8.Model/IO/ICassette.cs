@@ -4,5 +4,5 @@ namespace Chip8.Model.IO;
 
 public interface ICassette
 {
-    byte[] Load();
+    Memory<byte> Load();
 }

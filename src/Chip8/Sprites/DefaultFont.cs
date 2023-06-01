@@ -25,20 +25,8 @@ public record DefaultFont : IFont
         new Sprite(0xF0, 0x80, 0xF0, 0x80, 0x80)
     };
 
-    public ISprite Digit0 => digits[0];
-    public ISprite Digit1 => digits[1];
-    public ISprite Digit2 => digits[2];
-    public ISprite Digit3 => digits[3];
-    public ISprite Digit4 => digits[4];
-    public ISprite Digit5 => digits[5];
-    public ISprite Digit6 => digits[6];
-    public ISprite Digit7 => digits[7];
-    public ISprite Digit8 => digits[8];
-    public ISprite Digit9 => digits[9];
-    public ISprite DigitA => digits[10];
-    public ISprite DigitB => digits[11];
-    public ISprite DigitC => digits[12];
-    public ISprite DigitD => digits[13];
-    public ISprite DigitE => digits[14];
-    public ISprite DigitF => digits[15];
+    public ISprite GetDigit(FontDigit digit)
+    {
+        return digits[(int)digit];
+    }
 }

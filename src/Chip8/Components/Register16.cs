@@ -4,7 +4,7 @@ using Chip8.Model.Components;
 
 namespace Chip8.Components;
 
-public class Register16 : MemoryComponent, IRegister<ushort>
+public class Register16 : MemoryComponent, IRegisterI, IProgramCounter
 {
     public Register16(Memory<byte> memory)
         : base(memory, MemorySize)

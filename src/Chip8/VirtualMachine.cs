@@ -2,6 +2,9 @@ using Chip8.Model.IO;
 using Chip8.Components;
 using Chip8.Model;
 using Chip8.Model.Components;
+using Chip8.Model.Sprites;
+using Chip8.Sprites;
+using Chip8.Extensions;
 
 namespace Chip8;
 
@@ -14,12 +17,12 @@ public class VirtualMachine : IVirtualMachine
     private IRegisters registers;
     private ITimers timers;
     private IProcessor processor;
+    private IFont font;
 
     // IO
     private readonly ICassette cassette;
     private readonly IKeyboard keyboard;
     private readonly IDisplay display;
-    private readonly ISpeaker speaker;
     
     // Speed
     private int cyclesPerTick = 8;
@@ -33,20 +36,23 @@ public class VirtualMachine : IVirtualMachine
         stack = Stack.From(memory);
         registers = Registers.From(memory);
         timers = Timers.From(memory, clock, speaker);
+        font = new DefaultFont();
         
         processor = new Processor();
 
         this.cassette = cassette;
         this.keyboard = keyboard;
         this.display = display;
-        this.speaker = speaker;
+
+        Reset();
 
         clock.Tick += ExecuteCycles;
     }
 
     public void Reset()
     {
-        throw new NotImplementedException();
+        LoadFont(font, registers, addressableMemory);   
+        LoadProgram(cassette, registers, addressableMemory);
     }
 
     public static IVirtualMachine Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock, int cyclesPerTick = 8)
@@ -66,14 +72,34 @@ public class VirtualMachine : IVirtualMachine
         this.cyclesPerTick = cyclesPerTick;
     }
 
+    private static void LoadProgram(ICassette cassette, IRegisters registers, IAddressableMemory addressableMemory)
+    {
+        registers.ProgramCounter.SetValue(0x200);
+        registers.StackPointer.SetValue(0);
+
+        Memory<byte> program = cassette.Load();
+        addressableMemory.Write(registers.ProgramCounter, program);
+    }
+
+    private static void LoadFont(IFont font, IRegisters registers, IAddressableMemory addressableMemory)
+    {
+        registers.ProgramCounter.SetValue(0x0);
+
+        List<FontDigit> digits = Enum.GetValues<FontDigit>().ToList();
+        for (int i = 0; i < digits.Count; i++)
+        {
+            addressableMemory.WriteSprite(font.GetDigit(digits[i]), registers.ProgramCounter);
+        }
+    }
+
     private void ExecuteCycles(object? sender, TimeSpan elapsed)
     {
         bool shouldRedraw = false;
 
         for (int i = 0; i < cyclesPerTick; i++, shouldRedraw = true)
         {
-            IOpcode? opcode = processor.ExecuteCycle(addressableMemory, frameBuffer, stack, registers, timers, keyboard, speaker);
-            if (opcode is null)
+            ExecuteResult result = processor.ExecuteOpcode(addressableMemory, frameBuffer, stack, registers, timers, font, keyboard);
+            if (result == ExecuteResult.WaitingForKey)
             {
                 break;
             }
