@@ -20,7 +20,7 @@ public class FrameBuffer : MemoryComponent, IFrameBuffer
     int IFrameBuffer.Width => Width;
     int IFrameBuffer.Height => Height;
 
-    internal static FrameBuffer From(Memory<byte> memory)
+    internal static FrameBuffer AllocateFrom(ref Memory<byte> memory)
     {
         return new FrameBuffer(memory.Chunk(MemorySize));
     }

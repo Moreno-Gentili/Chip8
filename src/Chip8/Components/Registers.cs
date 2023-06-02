@@ -14,10 +14,10 @@ public class Registers : MemoryComponent, IRegisters
     public Registers(Memory<byte> memory)
         : base(memory, MemorySize)
     {
-        i = Register16.From(memory);
-        v = RegisterVCollection.From(memory, VxCount);
-        programCounter = Register16.From(memory);
-        stackPointer = Register8.From(memory);
+        i = Register16.AllocateFrom(ref memory);
+        v = RegisterVCollection.AllocateFrom(ref memory, VxCount);
+        programCounter = Register16.AllocateFrom(ref memory);
+        stackPointer = Register8.AllocateFrom(ref memory);
     }
 
     public static int MemorySize => VxSize + ISize + PcSize + SpSize;
@@ -27,7 +27,7 @@ public class Registers : MemoryComponent, IRegisters
     private static int PcSize = 1 * Register16.MemorySize;
     private static int SpSize = 1 * Register8.MemorySize;
 
-    public static Registers From(Memory<byte> memory)
+    public static Registers AllocateFrom(ref Memory<byte> memory)
     {
         return new Registers(memory.Chunk(MemorySize));
     }
@@ -43,9 +43,9 @@ public class RegisterVCollection : MemoryComponent, IRegisterVCollection
     private readonly IRegisterV[] v;
 
     private RegisterVCollection(Memory<byte> memory)
-        : base(memory, MemorySize)
+        : base(memory, memory.Length / MemorySize)
     {
-        v = Enumerable.Range(0, memory.Length / MemorySize).Select(i => (IRegisterV)Register8.From(memory)).ToArray();
+        v = Enumerable.Range(0, memory.Length / MemorySize).Select(i => (IRegisterV)Register8.AllocateFrom(ref memory)).ToArray();
     }
 
     public IRegisterV this[RegisterName registerName] => v[(int) registerName];
@@ -65,7 +65,7 @@ public class RegisterVCollection : MemoryComponent, IRegisterVCollection
 
     public static int MemorySize => sizeof(byte);
 
-    internal static RegisterVCollection From(Memory<byte> memory, int count)
+    internal static RegisterVCollection AllocateFrom(ref Memory<byte> memory, int count)
     {
         return new RegisterVCollection(memory.Chunk(MemorySize * count));
     }

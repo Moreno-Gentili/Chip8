@@ -10,7 +10,7 @@ public static class _3XNN
         IRegisterV register = registers.V[(RegisterName)x];
         if (register.GetValue() == nn)
         {
-            registers.ProgramCounter.SkipNext();
+            registers.ProgramCounter.ProceedToNextOpcode();
         }
 
         return ExecuteResult.Proceed;

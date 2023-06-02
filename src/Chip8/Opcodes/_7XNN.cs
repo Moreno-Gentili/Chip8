@@ -6,14 +6,14 @@ public static class _7XNN
 {
     public static ExecuteResult Execute(IRegisters registers, byte x, byte nn)
     {
-        IRegisterV register = registers.V[(RegisterName)x];
-        byte vxValue = register.GetValue();
+        IRegisterV registerX = registers.V[(RegisterName)x];
+        byte valueX = registerX.GetValue();
         unchecked
         {
-            vxValue += x;
+            valueX += nn;
         }
 
-        register.SetValue(vxValue);
+        registerX.SetValue(valueX);
         return ExecuteResult.Proceed;
     }
 }

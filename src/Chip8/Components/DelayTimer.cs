@@ -19,7 +19,7 @@ public class DelayTimer : MemoryComponent, ITimer
 
     public static int MemorySize = sizeof(byte);
 
-    internal static ITimer From(Memory<byte> memory, IClock clock)
+    internal static ITimer AllocateFrom(ref Memory<byte> memory, IClock clock)
     {
         return new DelayTimer(memory.Chunk(MemorySize), clock);
     }

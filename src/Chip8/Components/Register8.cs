@@ -13,7 +13,7 @@ public class Register8 : MemoryComponent, IRegisterV, IStackPointer
 
     public static int MemorySize => sizeof(byte);
 
-    public static Register8 From(Memory<byte> memory)
+    public static Register8 AllocateFrom(ref Memory<byte> memory)
     {
         return new Register8(memory.Chunk(MemorySize));
     }

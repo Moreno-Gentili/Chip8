@@ -4,14 +4,14 @@ namespace Chip8.Extensions
 {
     public static class ProgramCounterExtensions
     {
-        public static void Increment(this IProgramCounter programCounter, int value = 1)
+        public static void Increment(this IProgramCounter programCounter, int value)
         {
             programCounter.SetValue(Convert.ToUInt16(programCounter.GetValue() + value));
         }
 
-        public static void SkipNext(this IProgramCounter programCounter)
+        public static void ProceedToNextOpcode(this IProgramCounter programCounter)
         {
-            programCounter.Increment();
+            programCounter.Increment(sizeof(ushort));
         }
     }
 }

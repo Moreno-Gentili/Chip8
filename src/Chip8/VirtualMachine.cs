@@ -31,11 +31,11 @@ public class VirtualMachine : IVirtualMachine
     {
         // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
         Memory<byte> memory = new byte[AddressableMemory.MemorySize + FrameBuffer.MemorySize + Stack.MemorySize + Registers.MemorySize + Timers.MemorySize];
-        addressableMemory = AddressableMemory.From(memory);
-        frameBuffer = FrameBuffer.From(memory);
-        stack = Stack.From(memory);
-        registers = Registers.From(memory);
-        timers = Timers.From(memory, clock, speaker);
+        addressableMemory = AddressableMemory.AllocateFrom(ref memory);
+        frameBuffer = FrameBuffer.AllocateFrom(ref memory);
+        stack = Stack.AllocateFrom(ref memory);
+        registers = Registers.AllocateFrom(ref memory);
+        timers = Timers.AllocateFrom(ref memory, clock, speaker);
         font = new DefaultFont();
         
         processor = new Processor();

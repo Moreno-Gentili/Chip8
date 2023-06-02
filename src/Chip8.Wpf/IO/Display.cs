@@ -1,14 +1,17 @@
 using System.ComponentModel;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using WKey = System.Windows.Input.Key;
+using CKey = Chip8.Model.IO.Key;
 using Chip8.Model.Components;
 using Chip8.Model.IO;
 
 namespace Chip8.Wpf.IO;
 
-public class Display : Window, IDisplay
+public class Display : Window, IDisplay, IKeyboard
 {
     private const int Columns = 64;
     private const int Rows = 32;
@@ -16,6 +19,8 @@ public class Display : Window, IDisplay
     private readonly Rect rectangle;
     private readonly BitmapPalette bitmapPalette;
     private readonly BitmapSource? scanlines = null;
+
+    public CKey? PressedKey { get; set; }
 
     public Display(Color primaryColor, int scale = 6, bool drawScanlines = true)
     {
@@ -31,10 +36,57 @@ public class Display : Window, IDisplay
         Title = $"Video output ({Columns}x{Rows})";
         WindowStyle = WindowStyle.SingleBorderWindow;
 
+        this.KeyDown += Display_KeyDown;
+        this.KeyUp += Display_KeyUp;
+
         if (drawScanlines)
         {
             scanlines = GetScanlines();
         }
+    }
+
+    private void Display_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        CKey? pressedKey = MapKey(e.Key);
+
+        if (PressedKey == pressedKey)
+        {
+            PressedKey = null;
+        }
+    }
+
+    private void Display_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        CKey? pressedKey = MapKey(e.Key);
+
+        if (pressedKey != null)
+        {
+            PressedKey = pressedKey;
+        }
+    }
+
+    private CKey? MapKey(WKey key)
+    {
+        return key switch
+        {
+            WKey.D1 => CKey.Key1,
+            WKey.D2 => CKey.Key2,
+            WKey.D3 => CKey.Key3,
+            WKey.D4 => CKey.KeyC,
+            WKey.Q => CKey.Key4,
+            WKey.W => CKey.Key5,
+            WKey.E => CKey.Key6,
+            WKey.R => CKey.KeyD,
+            WKey.A => CKey.Key7,
+            WKey.S => CKey.Key8,
+            WKey.D => CKey.Key9,
+            WKey.F => CKey.KeyE,
+            WKey.Z => CKey.KeyA,
+            WKey.X => CKey.Key0,
+            WKey.C => CKey.KeyB,
+            WKey.V => CKey.KeyF,
+            _ => null
+        };
     }
 
     protected override void OnRender(DrawingContext dc)

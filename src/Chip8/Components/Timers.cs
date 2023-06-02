@@ -13,15 +13,15 @@ public class Timers : MemoryComponent, ITimers
     public Timers(Memory<byte> memory, IClock clock, ISpeaker speaker)
         : base(memory, MemorySize)
     {
-        this.soundTimer = SoundTimer.From(memory, clock, speaker);
-        this.delayTimer = DelayTimer.From(memory, clock);
+        this.soundTimer = SoundTimer.AllocateFrom(ref memory, clock, speaker);
+        this.delayTimer = DelayTimer.AllocateFrom(ref memory, clock);
     }
 
     public static int MemorySize = SoundTimer.MemorySize + DelayTimer.MemorySize;
     ITimer ITimers.SoundTimer => soundTimer;
     ITimer ITimers.DelayTimer => delayTimer;
 
-    public static Timers From(Memory<byte> memory, IClock clock, ISpeaker speaker)
+    public static Timers AllocateFrom(ref Memory<byte> memory, IClock clock, ISpeaker speaker)
     {
         return new Timers(memory.Chunk(MemorySize), clock, speaker);
     }

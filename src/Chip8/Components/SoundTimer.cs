@@ -19,7 +19,7 @@ public class SoundTimer : MemoryComponent, ITimer
 
     public static int MemorySize = sizeof(byte);
 
-    internal static ITimer From(Memory<byte> memory, IClock clock, ISpeaker speaker)
+    internal static ITimer AllocateFrom(ref Memory<byte> memory, IClock clock, ISpeaker speaker)
     {
         return new SoundTimer(memory.Chunk(MemorySize), clock, speaker);
     }

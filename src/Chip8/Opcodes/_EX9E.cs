@@ -13,7 +13,7 @@ public static class _EX9E
 
         if (keyboard.PressedKey == (Key)value)
         {
-            registers.ProgramCounter.SkipNext();
+            registers.ProgramCounter.ProceedToNextOpcode();
         }
 
         return ExecuteResult.Proceed;

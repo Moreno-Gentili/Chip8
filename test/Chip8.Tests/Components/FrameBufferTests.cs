@@ -1,4 +1,5 @@
 using Chip8.Components;
+using Chip8.Extensions;
 using Chip8.Model.Components;
 using Chip8.Sprites;
 
@@ -29,5 +30,34 @@ public class FrameBufferTests
                 Assert.IsTrue(frameBuffer[x, y]);
             }
         }
+    }
+
+    [Test]
+    public void Chunk_ShouldCutAwayFromOriginalMemory()
+    {
+        // Arrange
+        byte[] buffer = new byte[] { 0x00, 0x01, 0x02, 0x03, 0x04 };
+        Memory<byte> memory = buffer;
+
+        int chunk0Length = 2;
+        int chunk1Length = 2;
+        int chunk2Length = 1;
+        int chunk3Length = 1;
+        Memory<byte> chunk0 = memory.Chunk(chunk0Length);
+        Memory<byte> chunk1 = memory.Chunk(chunk1Length);
+        Memory<byte> chunk2 = memory.Chunk(chunk2Length);
+        Memory<byte> chunk3 = chunk1[0..1];
+
+        Assert.That(chunk0.Length, Is.EqualTo(chunk0Length));
+        Assert.That(chunk1.Length, Is.EqualTo(chunk1Length));
+        Assert.That(chunk2.Length, Is.EqualTo(chunk2Length));
+        Assert.That(chunk3.Length, Is.EqualTo(chunk3Length));
+
+        Assert.That(chunk0.Span[0], Is.EqualTo(buffer[0]));
+        Assert.That(chunk0.Span[1], Is.EqualTo(buffer[1]));
+        Assert.That(chunk1.Span[0], Is.EqualTo(buffer[2]));
+        Assert.That(chunk1.Span[1], Is.EqualTo(buffer[3]));
+        Assert.That(chunk2.Span[0], Is.EqualTo(buffer[4]));
+        Assert.That(chunk3.Span[0], Is.EqualTo(buffer[2]));
     }
 }

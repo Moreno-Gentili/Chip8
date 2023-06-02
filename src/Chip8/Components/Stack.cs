@@ -14,7 +14,7 @@ public class Stack : MemoryComponent, IStack
 
     public static int MemorySize = 16 * sizeof(ushort);
 
-    internal static Stack From(Memory<byte> memory)
+    internal static Stack AllocateFrom(ref Memory<byte> memory)
     {
         return new Stack(memory.Chunk(MemorySize));
     }

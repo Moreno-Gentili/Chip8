@@ -20,7 +20,7 @@ public class Processor : IProcessor
 
         if (lastResult == ExecuteResult.Proceed)
         {
-            registers.ProgramCounter.Increment();
+            registers.ProgramCounter.ProceedToNextOpcode();
         }
 
         return lastResult;

@@ -11,7 +11,7 @@ public static class _4XNN
         IRegisterV register = registers.V[(RegisterName)x];
         if (register.GetValue() != nn)
         {
-            registers.ProgramCounter.SkipNext();
+            registers.ProgramCounter.ProceedToNextOpcode();
         }
 
         return ExecuteResult.Proceed;

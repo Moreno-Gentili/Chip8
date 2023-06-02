@@ -11,7 +11,7 @@ public class AddressableMemory : MemoryComponent, IAddressableMemory
     {
     }
 
-    public static int MemorySize = 0xFFF;
+    public static int MemorySize = 0x1000;
 
     Range IAddressableMemory.FontRange => 0x000..0x200;
     Range IAddressableMemory.ProgramRange => 0x200..MemorySize;
@@ -21,7 +21,7 @@ public class AddressableMemory : MemoryComponent, IAddressableMemory
         return memory.Slice(position.GetValue(), length);
     }
 
-    internal static AddressableMemory From(Memory<byte> memory)
+    internal static AddressableMemory AllocateFrom(ref Memory<byte> memory)
     {
         return new AddressableMemory(memory.Chunk(MemorySize));
     }

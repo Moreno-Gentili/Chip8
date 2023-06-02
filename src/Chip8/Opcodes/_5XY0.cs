@@ -15,7 +15,7 @@ public static class _5XY0
 
         if (valueX == valueY)
         {
-            registers.ProgramCounter.SkipNext();
+            registers.ProgramCounter.ProceedToNextOpcode();
         }
 
         return ExecuteResult.Proceed;

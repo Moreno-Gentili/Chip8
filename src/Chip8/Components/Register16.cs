@@ -13,7 +13,7 @@ public class Register16 : MemoryComponent, IRegisterI, IProgramCounter
 
     public static int MemorySize => sizeof(ushort);
 
-    public static Register16 From(Memory<byte> memory)
+    public static Register16 AllocateFrom(ref Memory<byte> memory)
     {
         return new Register16(memory.Chunk(MemorySize));
     }

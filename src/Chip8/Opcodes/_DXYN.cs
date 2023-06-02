@@ -24,8 +24,14 @@ public static class _DXYN
             sprite = new Sprite(memory);
         }
 
+        IRegisterV registerX = registers.V[(RegisterName)x];
+        byte valueX = registerX.GetValue();
+        IRegisterV registerY = registers.V[(RegisterName)y];
+        byte valueY = registerY.GetValue();
+
+        DrawResult result = frameBuffer.Draw(sprite, valueX, valueY);
+        
         IRegisterV registerF = registers.V[RegisterName.VF];
-        DrawResult result = frameBuffer.Draw(sprite, x, y);
         registerF.SetValue(Convert.ToByte(result));
         
         return ExecuteResult.Proceed;
