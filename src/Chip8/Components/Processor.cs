@@ -62,7 +62,7 @@ public class Processor : IProcessor
             (F, _, 1, 8) => _FX18.Execute(registers, timers, op.X),
             (F, _, 1, E) => _FX1E.Execute(registers, op.X),
             (F, _, 2, 9) => _FX29.Execute(registers, font, op.X),
-            (F, _, 3, 3) => _FX33.Execute(registers, op.X),
+            (F, _, 3, 3) => _FX33.Execute(registers, addressableMemory, op.X),
             (F, _, 5, 5) => _FX55.Execute(registers, addressableMemory, op.X),
             (F, _, 6, 5) => _FX65.Execute(registers, addressableMemory, op.X),
             _ => throw new NotImplementedException($"Opcode {op} not implemented")

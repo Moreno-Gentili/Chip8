@@ -27,7 +27,7 @@ public record DefaultFont : IFont
 
     public Dictionary<FontDigit, ISprite> Digits => digits;
 
-    public ushort GetDigitLocation(FontDigit digit)
+    public ushort GetDigitPosition(FontDigit digit)
     {
         ISprite sprite = digits[digit];
         return Convert.ToUInt16(sprite.Memory.Length * (int)digit);
