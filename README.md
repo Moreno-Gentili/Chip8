@@ -17,3 +17,6 @@ http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/Chip8.pdf
 
 Draw sprites
 http://www.emulator101.com/chip-8-sprites.html
+
+Guide
+https://tobiasvl.github.io/blog/write-a-chip-8-emulator/

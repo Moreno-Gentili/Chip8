@@ -11,7 +11,11 @@ public class AddressableMemory : MemoryComponent, IAddressableMemory
     {
     }
 
-    public static int MemorySize = 4096 * sizeof(byte);
+    public static int MemorySize = 0xFFF;
+
+    Range IAddressableMemory.FontRange => 0x000..0x200;
+    Range IAddressableMemory.ProgramRange => 0x200..MemorySize;
+
     public Memory<byte> Read(IRegister<ushort> position, ushort length)
     {
         return memory.Slice(position.GetValue(), length);

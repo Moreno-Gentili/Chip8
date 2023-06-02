@@ -74,7 +74,8 @@ public class VirtualMachine : IVirtualMachine
 
     private static void LoadProgram(ICassette cassette, IRegisters registers, IAddressableMemory addressableMemory)
     {
-        registers.ProgramCounter.SetValue(0x200);
+        ushort programLocation = Convert.ToUInt16(addressableMemory.ProgramRange.Start.Value);
+        registers.ProgramCounter.SetValue(programLocation);
         registers.StackPointer.SetValue(0);
 
         Memory<byte> program = cassette.Load();
@@ -83,12 +84,13 @@ public class VirtualMachine : IVirtualMachine
 
     private static void LoadFont(IFont font, IRegisters registers, IAddressableMemory addressableMemory)
     {
-        registers.ProgramCounter.SetValue(0x0);
+        ushort fontLocation = Convert.ToUInt16(addressableMemory.FontRange.Start.Value);
+        registers.ProgramCounter.SetValue(fontLocation);
 
         List<FontDigit> digits = Enum.GetValues<FontDigit>().ToList();
         for (int i = 0; i < digits.Count; i++)
         {
-            addressableMemory.WriteSprite(font.GetDigit(digits[i]), registers.ProgramCounter);
+            addressableMemory.WriteSprite(font.Digits[(FontDigit)i], registers.ProgramCounter);
         }
     }
 

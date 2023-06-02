@@ -8,10 +8,10 @@ namespace Chip8.Tests;
 public class SpriteTests
 {
     [Test]
-    public void Indexer_ShouldReturnTrueForLitPixels()
+    public void Indexer_ShouldReturnTrueForActivePixels()
     {
         // Arrange
-        ISprite digit0 = new DefaultFont().Digit0;
+        ISprite digit0 = new DefaultFont().Digits[FontDigit.Digit0];
 
         // Assert
         Assert.IsTrue(digit0[0, 0]);

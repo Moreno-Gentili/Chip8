@@ -2,7 +2,8 @@ namespace Chip8.Model.Sprites;
 
 public interface IFont
 {
-    ISprite GetDigit(FontDigit digit);
+    Dictionary<FontDigit, ISprite> Digits { get; }
+    ushort GetDigitLocation(FontDigit digit);
 } 
 
 public enum FontDigit

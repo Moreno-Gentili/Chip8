@@ -4,6 +4,9 @@ namespace Chip8.Model.Components;
 
 public interface IAddressableMemory
 {
+    Range FontRange { get; }
+    Range ProgramRange { get; }
+
     Memory<byte> Read(IRegister<ushort> position, ushort length);
 
     void Write(IRegister<ushort> position, Memory<byte> data);
