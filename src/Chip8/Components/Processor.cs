@@ -3,6 +3,7 @@ using Chip8.Model.Components;
 using Chip8.Model.IO;
 using Chip8.Model.Sprites;
 using Chip8.Opcodes;
+using System.Diagnostics;
 
 namespace Chip8.Components;
 
@@ -28,6 +29,7 @@ public class Processor : IProcessor
 
     private static ExecuteResult ExecuteOpcode(Opcode op, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
+        // Debug.WriteLine(registers.ProgramCounter.GetValue() + ": " + op.ToString());
         return op switch
         {
             (0, 0, E, 0) => _00E0.Execute(frameBuffer),
