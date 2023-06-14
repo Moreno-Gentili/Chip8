@@ -4,7 +4,8 @@ namespace Chip8.Model;
 
 public interface IVirtualMachine
 {
-    static abstract IVirtualMachine Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock, int cyclesPerTick = 8);
-    void SetSpeed(int cyclesPerTick);
+    static abstract IVirtualMachine Create(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker);
+    int CpuInstructionsPerSecond { get; set; }
+    void Update(TimeSpan time);
     void Reset();
 }

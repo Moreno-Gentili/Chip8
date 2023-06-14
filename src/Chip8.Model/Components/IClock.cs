@@ -1,4 +1,4 @@
-namespace Chip8.Model.IO;
+namespace Chip8.Model.Components;
 
 public interface IClock
 {

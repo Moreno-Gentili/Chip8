@@ -53,10 +53,7 @@ public class SoundTimer : MemoryComponent, ITimer
 
     private void Decrement(object? sender, TimeSpan elapsed)
     {
-        if (memory.Span[0] > 0)
-        {
-            SetValue(Convert.ToByte(memory.Span[0] - 1));
-        }
+        SetValue(Convert.ToByte(memory.Span[0] - 1));
     }
 
     private void Activate()

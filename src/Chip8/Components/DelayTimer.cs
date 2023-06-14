@@ -1,7 +1,6 @@
 using Chip8.Components.Base;
 using Chip8.Extensions;
 using Chip8.Model.Components;
-using Chip8.Model.IO;
 
 namespace Chip8.Components;
 

@@ -11,26 +11,27 @@ namespace Chip8;
 public class VirtualMachine : IVirtualMachine
 {
     // Components
-    private IAddressableMemory addressableMemory;
-    private IFrameBuffer frameBuffer;
-    private IStack stack;
-    private IRegisters registers;
-    private ITimers timers;
-    private IProcessor processor;
-    private IFont font;
+    private readonly Clock clock;
+    private readonly Memory<byte> memory;
+    private readonly IAddressableMemory addressableMemory;
+    private readonly IFrameBuffer frameBuffer;
+    private readonly IStack stack;
+    private readonly IRegisters registers;
+    private readonly ITimers timers;
+    private readonly IProcessor processor;
+    private readonly IFont font;
 
     // IO
     private readonly ICassette cassette;
     private readonly IKeyboard keyboard;
     private readonly IDisplay display;
-    
-    // Speed
-    private int cyclesPerTick = 8;
 
-    public VirtualMachine(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock)
+    private VirtualMachine(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker)
     {
+        clock = new Clock();
+
         // The original VM put the framebuffer, the stack, and the emulated registers at the top of accessible memory
-        Memory<byte> memory = new byte[AddressableMemory.MemorySize + FrameBuffer.MemorySize + Stack.MemorySize + Registers.MemorySize + Timers.MemorySize];
+        memory = new byte[AddressableMemory.MemorySize + FrameBuffer.MemorySize + Stack.MemorySize + Registers.MemorySize + Timers.MemorySize];
         addressableMemory = AddressableMemory.AllocateFrom(ref memory);
         frameBuffer = FrameBuffer.AllocateFrom(ref memory);
         stack = Stack.AllocateFrom(ref memory);
@@ -45,31 +46,59 @@ public class VirtualMachine : IVirtualMachine
         this.display = display;
 
         Reset();
-
-        clock.Tick += ExecuteCycles;
     }
 
     public void Reset()
     {
+        Clear(memory);
         LoadFont(font, registers, addressableMemory);   
         LoadProgram(cassette, registers, addressableMemory);
     }
 
-    public static IVirtualMachine Run(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker, IClock clock, int cyclesPerTick = 8)
+    public static IVirtualMachine Create(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker)
     {
-        VirtualMachine vm = new(cassette, keyboard, display, speaker, clock);
-        vm.SetSpeed(cyclesPerTick);
-        return vm;
+        return new VirtualMachine(cassette, keyboard, display, speaker);
     }
 
-    public void SetSpeed(int cyclesPerTick)
+    public int CpuInstructionsPerSecond
     {
-        if (cyclesPerTick <= 0)
+        get
         {
-            throw new ArgumentException("Speed must be greater than 0", nameof(cyclesPerTick));
+            return clock.CpuInstructionsPerSecond;
         }
 
-        this.cyclesPerTick = cyclesPerTick;
+        set
+        {
+            clock.CpuInstructionsPerSecond = value;
+        }
+    }
+
+    public void Update(TimeSpan time)
+    {
+        bool shouldRedraw = false;
+        int instructionsCount = clock.Update(time);
+
+        for (int i = 0; i < instructionsCount; i++, shouldRedraw = true)
+        {
+            ExecuteResult result = processor.ExecuteOpcode(addressableMemory, frameBuffer, stack, registers, timers, font, keyboard);
+            if (result == ExecuteResult.WaitingForKey)
+            {
+                break;
+            }
+        }
+
+        if (shouldRedraw)
+        {
+            display.Show(frameBuffer);
+        }
+    }
+
+    private static void Clear(Memory<byte> memory)
+    {
+        for (int i = 0; i < memory.Length; i++)
+        {
+            memory.Span[i] = byte.MinValue;
+        }
     }
 
     private static void LoadProgram(ICassette cassette, IRegisters registers, IAddressableMemory addressableMemory)
@@ -91,25 +120,6 @@ public class VirtualMachine : IVirtualMachine
         for (int i = 0; i < digits.Count; i++)
         {
             addressableMemory.WriteSprite(font.Digits[(FontDigit)i], registers.ProgramCounter);
-        }
-    }
-
-    private void ExecuteCycles(object? sender, TimeSpan elapsed)
-    {
-        bool shouldRedraw = false;
-
-        for (int i = 0; i < cyclesPerTick; i++, shouldRedraw = true)
-        {
-            ExecuteResult result = processor.ExecuteOpcode(addressableMemory, frameBuffer, stack, registers, timers, font, keyboard);
-            if (result == ExecuteResult.WaitingForKey)
-            {
-                break;
-            }
-        }
-
-        if (shouldRedraw)
-        {
-            display.Show(frameBuffer);
         }
     }
 }

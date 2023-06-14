@@ -4,7 +4,7 @@ using Chip8.Model.Components;
 
 namespace Chip8.Components;
 
-public class AddressableMemory : MemoryComponent, IAddressableMemory
+internal class AddressableMemory : MemoryComponent, IAddressableMemory
 {
     public AddressableMemory(Memory<byte> memory)
         : base(memory, MemorySize)
