@@ -4,8 +4,8 @@ namespace Chip8.Opcodes;
 
 public static class _8XY5
 {
-    private const byte borrow = 1;
-    private const byte noBorrow = 0;
+    private const byte borrow = 0;
+    private const byte noBorrow = 1;
 
     public static ExecuteResult Execute(IRegisters registers, byte x, byte y)
     {

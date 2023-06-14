@@ -8,6 +8,7 @@ https://en.wikipedia.org/wiki/CHIP-8
 
 OpCodes
 https://github.com/mfurga/chip8
+https://laurencescotford.com/chip-8-on-the-cosmac-vip-arithmetic-and-logic-instructions/
 
 Specification
 https://github.com/CaffeineViking/chip-8/blob/master/doc/specification.md
@@ -20,3 +21,7 @@ http://www.emulator101.com/chip-8-sprites.html
 
 Guide
 https://tobiasvl.github.io/blog/write-a-chip-8-emulator/
+
+Test roms
+https://github.com/Skosulor/c8int/tree/master/test
+https://github.com/corax89/chip8-test-rom
