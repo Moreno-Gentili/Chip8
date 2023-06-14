@@ -9,6 +9,7 @@ https://en.wikipedia.org/wiki/CHIP-8
 OpCodes
 https://github.com/mfurga/chip8
 https://laurencescotford.com/chip-8-on-the-cosmac-vip-arithmetic-and-logic-instructions/
+https://github.com/mattmikolay/chip-8/wiki/CHIP%E2%80%908-Instruction-Set
 
 Specification
 https://github.com/CaffeineViking/chip-8/blob/master/doc/specification.md
