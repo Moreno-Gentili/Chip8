@@ -7,7 +7,7 @@ public static class _8XY4
     private const byte carry = 1;
     private const byte noCarry = 0;
 
-    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, RegisterName y)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, RegisterName y)
     {
         IRegisterV registerX = registers.V[x];
         IRegisterV registerY = registers.V[y];
@@ -26,6 +26,6 @@ public static class _8XY4
 
         registerX.SetValue(valueX);
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

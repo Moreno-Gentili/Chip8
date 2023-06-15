@@ -4,7 +4,7 @@ namespace Chip8.Opcodes;
 
 public static class _7XNN
 {
-    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, byte nn)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, byte nn)
     {
         IRegisterV registerX = registers.V[x];
         byte valueX = registerX.GetValue();
@@ -15,6 +15,6 @@ public static class _7XNN
 
         registerX.SetValue(valueX);
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

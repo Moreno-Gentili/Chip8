@@ -5,7 +5,7 @@ namespace Chip8.Opcodes;
 
 public static class _FX29
 {
-    public static ProgramCounterResult Execute(IRegisters registers, IFont font, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, IFont font, RegisterName x)
     {
         IRegisterV registerX = registers.V[x];
         FontDigit valueX = (FontDigit)registerX.GetValue();
@@ -13,6 +13,6 @@ public static class _FX29
 
         registers.I.SetValue(position);
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

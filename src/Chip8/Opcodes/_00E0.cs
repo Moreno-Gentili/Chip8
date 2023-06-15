@@ -4,9 +4,9 @@ namespace Chip8.Opcodes;
 
 public static class _00E0
 {
-    public static ProgramCounterResult Execute(IFrameBuffer frameBuffer)
+    public static ProgramCounterHint Execute(IFrameBuffer frameBuffer)
     {
         frameBuffer.Clear();
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

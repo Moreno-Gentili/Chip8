@@ -11,12 +11,12 @@ namespace Chip8.Components;
 public class Processor : IProcessor
 {
     private const byte A = 10, B = 11, C = 12, D = 13, E = 14, F = 15;
-    ProgramCounterResult lastResult = ProgramCounterResult.Advance;
-    public ProgramCounterResult ExecuteOpcode(IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
+    ProgramCounterHint lastResult = ProgramCounterHint.Advance;
+    public ProgramCounterHint ExecuteOpcode(IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
         lastResult = lastResult switch
         {
-            ProgramCounterResult.WaitingForKey when keyboard.PressedKey is null => lastResult,
+            ProgramCounterHint.WaitForKey when keyboard.PressedKey is null => lastResult,
             _ => ExecuteOpcode(addressableMemory.Read(registers.ProgramCounter, sizeof(ushort)), addressableMemory, frameBuffer, stack, registers, timers, font, keyboard)
         };
 
@@ -25,22 +25,22 @@ public class Processor : IProcessor
         return lastResult;
     }
 
-    private static void AdvanceProgramCounterIfNeeded(IProgramCounter programCounter, ProgramCounterResult result)
+    private static void AdvanceProgramCounterIfNeeded(IProgramCounter programCounter, ProgramCounterHint result)
     {
         switch (result)
         {
-            case ProgramCounterResult.SkipOneThenAdvance:
+            case ProgramCounterHint.SkipOneThenAdvance:
                 programCounter.AdvanceToNextOpcode();
                 programCounter.AdvanceToNextOpcode();
                 break;
 
-            case ProgramCounterResult.Advance:
+            case ProgramCounterHint.Advance:
                 programCounter.AdvanceToNextOpcode();
                 break;
         }
     }
 
-    private static ProgramCounterResult ExecuteOpcode(Opcode op, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
+    private static ProgramCounterHint ExecuteOpcode(Opcode op, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
         // Debug.WriteLine(registers.ProgramCounter.GetValue() + ": " + op.ToString());
         return op switch

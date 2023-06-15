@@ -4,7 +4,7 @@ namespace Chip8.Opcodes;
 
 public static class _FX1E
 {
-    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x)
     {
         IRegisterV registerX = registers.V[x];
         ushort valueI = registers.I.GetValue();
@@ -17,6 +17,6 @@ public static class _FX1E
 
         registers.I.SetValue(valueI);
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

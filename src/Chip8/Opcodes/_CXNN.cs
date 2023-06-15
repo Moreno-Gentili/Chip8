@@ -4,7 +4,7 @@ namespace Chip8.Opcodes;
 
 public static class _CXNN
 {
-    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, byte nn)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, byte nn)
     {
         byte randomValue = Convert.ToByte(Random.Shared.Next(byte.MinValue, byte.MaxValue));
         IRegisterV registerX = registers.V[x];
@@ -12,6 +12,6 @@ public static class _CXNN
 
         registerX.SetValue(valueX);
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

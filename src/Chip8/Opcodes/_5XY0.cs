@@ -4,7 +4,7 @@ namespace Chip8.Opcodes;
 
 public static class _5XY0
 {
-    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, RegisterName y)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, RegisterName y)
     {
         IRegisterV registerX = registers.V[x];
         IRegisterV registerY = registers.V[y];
@@ -13,7 +13,7 @@ public static class _5XY0
         byte valueY = registerY.GetValue();
 
         return valueX == valueY ?
-            ProgramCounterResult.SkipOneThenAdvance :
-            ProgramCounterResult.Advance;
+            ProgramCounterHint.SkipOneThenAdvance :
+            ProgramCounterHint.Advance;
     }
 }

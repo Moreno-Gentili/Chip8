@@ -4,10 +4,10 @@ namespace Chip8.Opcodes;
 
 public static class _0NNN
 {
-    public static ProgramCounterResult Execute(ushort nnn)
+    public static ProgramCounterHint Execute(ushort nnn)
     {
         // This instruction is only used on the old computers on which Chip-8 was originally implemented.
         // It is ignored by modern interpreters.
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

@@ -80,8 +80,8 @@ public class VirtualMachine : IVirtualMachine
 
         for (int i = 0; i < instructionsCount; i++, shouldRedraw = true)
         {
-            ProgramCounterResult result = processor.ExecuteOpcode(addressableMemory, frameBuffer, stack, registers, timers, font, keyboard);
-            if (result == ProgramCounterResult.WaitingForKey)
+            ProgramCounterHint result = processor.ExecuteOpcode(addressableMemory, frameBuffer, stack, registers, timers, font, keyboard);
+            if (result == ProgramCounterHint.WaitForKey)
             {
                 break;
             }

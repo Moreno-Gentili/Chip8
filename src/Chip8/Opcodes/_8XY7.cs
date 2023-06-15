@@ -7,7 +7,7 @@ public static class _8XY7
     private const byte borrow = 1;
     private const byte noBorrow = 0;
 
-    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, RegisterName y)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, RegisterName y)
     {
         IRegisterV registerX = registers.V[x];
         IRegisterV registerY = registers.V[y];
@@ -26,6 +26,6 @@ public static class _8XY7
 
         registerX.SetValue(valueY);
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

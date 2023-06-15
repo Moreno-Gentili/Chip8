@@ -4,7 +4,7 @@ namespace Chip8.Opcodes;
 
 public static class _FX33
 {
-    public static ProgramCounterResult Execute(IRegisters registers, IAddressableMemory memory, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, IAddressableMemory memory, RegisterName x)
     {
         IRegisterV registerX = registers.V[x];
         byte valueX = registerX.GetValue();
@@ -15,6 +15,6 @@ public static class _FX33
 
         memory.Write(registers.I, new[] { hundreds, tens, ones });
 
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }

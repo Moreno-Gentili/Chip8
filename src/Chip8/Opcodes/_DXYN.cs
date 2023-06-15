@@ -7,7 +7,7 @@ namespace Chip8.Opcodes;
 
 public static class _DXYN
 {
-    public static ProgramCounterResult Execute(IRegisters registers, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, RegisterName x, RegisterName y, byte n)
+    public static ProgramCounterHint Execute(IRegisters registers, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, RegisterName x, RegisterName y, byte n)
     {
 
         ISprite sprite;
@@ -34,6 +34,6 @@ public static class _DXYN
         IRegisterV registerF = registers.V[RegisterName.VF];
         registerF.SetValue(Convert.ToByte(result));
         
-        return ProgramCounterResult.Advance;
+        return ProgramCounterHint.Advance;
     }
 }
