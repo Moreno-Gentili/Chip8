@@ -4,13 +4,14 @@ namespace Chip8.Opcodes;
 
 public static class _CXNN
 {
-    public static ExecuteResult Execute(IRegisters registers, byte x, byte nn)
+    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, byte nn)
     {
         byte randomValue = Convert.ToByte(Random.Shared.Next(byte.MinValue, byte.MaxValue));
-        IRegisterV registerX = registers.V[(RegisterName)x];
+        IRegisterV registerX = registers.V[x];
         byte valueX = Convert.ToByte(randomValue & nn);
+
         registerX.SetValue(valueX);
 
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

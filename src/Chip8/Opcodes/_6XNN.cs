@@ -4,10 +4,11 @@ namespace Chip8.Opcodes;
 
 public static class _6XNN
 {
-    public static ExecuteResult Execute(IRegisters registers, byte x, byte nn)
+    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, byte nn)
     {
-        IRegisterV register = registers.V[(RegisterName)x];
+        IRegisterV register = registers.V[x];
         register.SetValue(nn);
-        return ExecuteResult.Proceed;
+
+        return ProgramCounterResult.Advance;
     }
 }

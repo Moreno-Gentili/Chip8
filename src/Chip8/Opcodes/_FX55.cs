@@ -4,11 +4,11 @@ namespace Chip8.Opcodes;
 
 public static class _FX55
 {
-    public static ExecuteResult Execute(IRegisters registers, IAddressableMemory addressableMemory, byte x)
+    public static ProgramCounterResult Execute(IRegisters registers, IAddressableMemory addressableMemory, RegisterName x)
     {
-        Memory<byte> memory = registers.V[..(x + 1)];
+        Memory<byte> memory = registers.V[RegisterName.V0, x];
         addressableMemory.Write(registers.I, memory);
 
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

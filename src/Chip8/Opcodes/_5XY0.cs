@@ -1,23 +1,19 @@
-﻿using Chip8.Extensions;
-using Chip8.Model.Components;
+﻿using Chip8.Model.Components;
 
 namespace Chip8.Opcodes;
 
 public static class _5XY0
 {
-    public static ExecuteResult Execute(IRegisters registers, byte x, byte y)
+    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, RegisterName y)
     {
-        IRegisterV registerX = registers.V[(RegisterName)x];
-        IRegisterV registerY = registers.V[(RegisterName)y];
+        IRegisterV registerX = registers.V[x];
+        IRegisterV registerY = registers.V[y];
 
         byte valueX = registerX.GetValue();
         byte valueY = registerY.GetValue();
 
-        if (valueX == valueY)
-        {
-            registers.ProgramCounter.ProceedToNextOpcode();
-        }
-
-        return ExecuteResult.Proceed;
+        return valueX == valueY ?
+            ProgramCounterResult.SkipOneThenAdvance :
+            ProgramCounterResult.Advance;
     }
 }

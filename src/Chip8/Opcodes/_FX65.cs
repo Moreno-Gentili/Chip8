@@ -4,10 +4,10 @@ namespace Chip8.Opcodes;
 
 public static class _FX65
 {
-    public static ExecuteResult Execute(IRegisters registers, IAddressableMemory addressableMemory, byte x)
+    public static ProgramCounterResult Execute(IRegisters registers, IAddressableMemory addressableMemory, RegisterName x)
     {
-        registers.V[..(x + 1)] = addressableMemory.Read(registers.I, Convert.ToUInt16(x + 1));
+        registers.V[RegisterName.V0, x] = addressableMemory.Read(registers.I, Convert.ToUInt16(x + 1));
         
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

@@ -5,13 +5,14 @@ namespace Chip8.Opcodes;
 
 public static class _FX29
 {
-    public static ExecuteResult Execute(IRegisters registers, IFont font, byte x)
+    public static ProgramCounterResult Execute(IRegisters registers, IFont font, RegisterName x)
     {
-        IRegisterV registerX = registers.V[(RegisterName)x];
-        byte valueX = registerX.GetValue();
-        ushort position = font.GetDigitPosition((FontDigit)valueX);
+        IRegisterV registerX = registers.V[x];
+        FontDigit valueX = (FontDigit)registerX.GetValue();
+        ushort position = font.GetDigitPosition(valueX);
+
         registers.I.SetValue(position);
 
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

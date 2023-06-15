@@ -1,4 +1,6 @@
 using Chip8.Components.Base;
+using Chip8.Model.Components;
+
 namespace Chip8.Components;
 
 public class Opcode : MemoryComponent
@@ -10,8 +12,8 @@ public class Opcode : MemoryComponent
 
     public static int MemorySize => sizeof(ushort);
 
-    public byte X => Nibble2;
-    public byte Y => Nibble3;
+    public RegisterName X => (RegisterName)Nibble2;
+    public RegisterName Y => (RegisterName)Nibble3;
     public byte N => Nibble4;
     public byte NN => Convert.ToByte((Nibble3 << 4) + Nibble4);
     public ushort NNN => Convert.ToUInt16((Nibble2 << 8) + NN);

@@ -9,7 +9,7 @@ namespace Chip8.Extensions
             programCounter.SetValue(Convert.ToUInt16(programCounter.GetValue() + value));
         }
 
-        public static void ProceedToNextOpcode(this IProgramCounter programCounter)
+        public static void AdvanceToNextOpcode(this IProgramCounter programCounter)
         {
             programCounter.Increment(sizeof(ushort));
         }

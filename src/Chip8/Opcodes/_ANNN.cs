@@ -4,9 +4,10 @@ namespace Chip8.Opcodes;
 
 public static class _ANNN
 {
-    public static ExecuteResult Execute(IRegisters registers, ushort nnn)
+    public static ProgramCounterResult Execute(IRegisters registers, ushort nnn)
     {
         registers.I.SetValue(nnn);
-        return ExecuteResult.Proceed;
+
+        return ProgramCounterResult.Advance;
     }
 }

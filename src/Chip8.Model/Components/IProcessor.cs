@@ -6,12 +6,13 @@ namespace Chip8.Model.Components;
 public interface IProcessor
 {
     // Each CHIP-8 instruction took a variable number of clock cycles to complete.
-    ExecuteResult ExecuteOpcode(IAddressableMemory Memory, IFrameBuffer frameBuffer, IStack stack, IRegisters Registers, ITimers timers, IFont font, IKeyboard keyboard);
+    ProgramCounterResult ExecuteOpcode(IAddressableMemory Memory, IFrameBuffer frameBuffer, IStack stack, IRegisters Registers, ITimers timers, IFont font, IKeyboard keyboard);
 }
 
-public enum ExecuteResult
+public enum ProgramCounterResult
 {
-    Proceed,
-    Jumped,
+    Advance,
+    Stay,
+    SkipOneThenAdvance,
     WaitingForKey
 }

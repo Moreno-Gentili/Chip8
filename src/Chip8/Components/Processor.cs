@@ -3,6 +3,7 @@ using Chip8.Model.Components;
 using Chip8.Model.IO;
 using Chip8.Model.Sprites;
 using Chip8.Opcodes;
+using Microsoft.Win32;
 using System.Diagnostics;
 
 namespace Chip8.Components;
@@ -10,24 +11,36 @@ namespace Chip8.Components;
 public class Processor : IProcessor
 {
     private const byte A = 10, B = 11, C = 12, D = 13, E = 14, F = 15;
-    ExecuteResult lastResult = ExecuteResult.Proceed;
-    public ExecuteResult ExecuteOpcode(IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
+    ProgramCounterResult lastResult = ProgramCounterResult.Advance;
+    public ProgramCounterResult ExecuteOpcode(IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
         lastResult = lastResult switch
         {
-            ExecuteResult.WaitingForKey when keyboard.PressedKey is null => lastResult,
+            ProgramCounterResult.WaitingForKey when keyboard.PressedKey is null => lastResult,
             _ => ExecuteOpcode(addressableMemory.Read(registers.ProgramCounter, sizeof(ushort)), addressableMemory, frameBuffer, stack, registers, timers, font, keyboard)
         };
 
-        if (lastResult == ExecuteResult.Proceed)
-        {
-            registers.ProgramCounter.ProceedToNextOpcode();
-        }
+        AdvanceProgramCounterIfNeeded(registers.ProgramCounter, lastResult);
 
         return lastResult;
     }
 
-    private static ExecuteResult ExecuteOpcode(Opcode op, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
+    private static void AdvanceProgramCounterIfNeeded(IProgramCounter programCounter, ProgramCounterResult result)
+    {
+        switch (result)
+        {
+            case ProgramCounterResult.SkipOneThenAdvance:
+                programCounter.AdvanceToNextOpcode();
+                programCounter.AdvanceToNextOpcode();
+                break;
+
+            case ProgramCounterResult.Advance:
+                programCounter.AdvanceToNextOpcode();
+                break;
+        }
+    }
+
+    private static ProgramCounterResult ExecuteOpcode(Opcode op, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
         // Debug.WriteLine(registers.ProgramCounter.GetValue() + ": " + op.ToString());
         return op switch

@@ -5,11 +5,11 @@ namespace Chip8.Opcodes;
 
 public static class _2NNN
 {
-    public static ExecuteResult Execute(IStack stack, IRegisters registers, ushort nnn)
+    public static ProgramCounterResult Execute(IStack stack, IRegisters registers, ushort nnn)
     {
         registers.StackPointer.Increment();
         stack.SetAddress(registers.StackPointer, registers.ProgramCounter.GetValue());
         registers.ProgramCounter.SetValue(nnn);
-        return ExecuteResult.Jumped;
+        return ProgramCounterResult.Stay;
     }
 }

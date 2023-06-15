@@ -4,12 +4,13 @@ namespace Chip8.Opcodes;
 
 public static class _FX18
 {
-    public static ExecuteResult Execute(IRegisters registers, ITimers timers, byte x)
+    public static ProgramCounterResult Execute(IRegisters registers, ITimers timers, RegisterName x)
     {
-        IRegisterV register = registers.V[(RegisterName)x];
+        IRegisterV register = registers.V[x];
         byte value = register.GetValue();
+
         timers.SoundTimer.SetValue(value);
 
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

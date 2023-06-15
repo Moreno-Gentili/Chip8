@@ -7,10 +7,10 @@ public static class _8XY4
     private const byte carry = 1;
     private const byte noCarry = 0;
 
-    public static ExecuteResult Execute(IRegisters registers, byte x, byte y)
+    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, RegisterName y)
     {
-        IRegisterV registerX = registers.V[(RegisterName)x];
-        IRegisterV registerY = registers.V[(RegisterName)y];
+        IRegisterV registerX = registers.V[x];
+        IRegisterV registerY = registers.V[y];
         IRegisterV registerF = registers.V[RegisterName.VF];
 
         byte valueX = registerX.GetValue();
@@ -26,6 +26,6 @@ public static class _8XY4
 
         registerX.SetValue(valueX);
 
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

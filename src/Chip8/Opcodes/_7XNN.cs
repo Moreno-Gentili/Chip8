@@ -4,9 +4,9 @@ namespace Chip8.Opcodes;
 
 public static class _7XNN
 {
-    public static ExecuteResult Execute(IRegisters registers, byte x, byte nn)
+    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, byte nn)
     {
-        IRegisterV registerX = registers.V[(RegisterName)x];
+        IRegisterV registerX = registers.V[x];
         byte valueX = registerX.GetValue();
         unchecked
         {
@@ -14,6 +14,7 @@ public static class _7XNN
         }
 
         registerX.SetValue(valueX);
-        return ExecuteResult.Proceed;
+
+        return ProgramCounterResult.Advance;
     }
 }

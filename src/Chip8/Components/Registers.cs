@@ -50,11 +50,13 @@ public class RegisterVCollection : MemoryComponent, IRegisterVCollection
 
     public IRegisterV this[RegisterName registerName] => v[(int) registerName];
 
-    public Memory<byte> this[Range range]
+    public Memory<byte> this[RegisterName fromRegisterName, RegisterName toRegisterName]
     {
         get
         {
-            return memory[range];
+            byte lowerInclusiveBound = Convert.ToByte(fromRegisterName);
+            byte upperExclusiveBound = Convert.ToByte(toRegisterName + 1);
+            return memory[lowerInclusiveBound..upperExclusiveBound];
         }
 
         set

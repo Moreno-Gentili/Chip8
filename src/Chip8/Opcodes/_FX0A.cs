@@ -5,17 +5,18 @@ namespace Chip8.Opcodes;
 
 public static class _FX0A
 {
-    public static ExecuteResult Execute(IRegisters registers, IKeyboard keyboard, byte x)
+    public static ProgramCounterResult Execute(IRegisters registers, IKeyboard keyboard, RegisterName x)
     {
         if (!keyboard.PressedKey.HasValue)
         {
-            return ExecuteResult.WaitingForKey;
+            return ProgramCounterResult.WaitingForKey;
         }
 
         byte value = (byte)keyboard.PressedKey.Value;
-        IRegisterV register = registers.V[(RegisterName)x];
+        IRegisterV register = registers.V[x];
+
         register.SetValue(value);
 
-        return ExecuteResult.Proceed;
+        return ProgramCounterResult.Advance;
     }
 }

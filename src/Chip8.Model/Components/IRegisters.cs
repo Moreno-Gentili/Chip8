@@ -1,6 +1,3 @@
-using static System.Formats.Asn1.AsnWriter;
-using System.Net;
-
 namespace Chip8.Model.Components;
 
 public interface IRegisters
@@ -26,7 +23,7 @@ public interface IRegisterV : IRegister<byte>
 public interface IRegisterVCollection
 {
     IRegisterV this[RegisterName registerName] { get; }
-    Memory<byte> this[Range range] { get; set; }
+    Memory<byte> this[RegisterName fromRegisterName, RegisterName toRegisterName] { get; set; }
 }
 
 public interface IRegisterI : IRegister<ushort>

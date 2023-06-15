@@ -1,19 +1,15 @@
-﻿using Chip8.Extensions;
-using Chip8.Model.Components;
-using System.Xml.Linq;
+﻿using Chip8.Model.Components;
 
 namespace Chip8.Opcodes;
 
 public static class _4XNN
 {
-    public static ExecuteResult Execute(IRegisters registers, byte x, byte nn)
+    public static ProgramCounterResult Execute(IRegisters registers, RegisterName x, byte nn)
     {
-        IRegisterV register = registers.V[(RegisterName)x];
-        if (register.GetValue() != nn)
-        {
-            registers.ProgramCounter.ProceedToNextOpcode();
-        }
+        IRegisterV register = registers.V[x];
 
-        return ExecuteResult.Proceed;
+        return register.GetValue() != nn ?
+            ProgramCounterResult.SkipOneThenAdvance :
+            ProgramCounterResult.Advance;
     }
 }
