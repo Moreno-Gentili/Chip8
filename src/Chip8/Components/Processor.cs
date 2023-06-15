@@ -3,8 +3,6 @@ using Chip8.Model.Components;
 using Chip8.Model.IO;
 using Chip8.Model.Sprites;
 using Chip8.Opcodes;
-using Microsoft.Win32;
-using System.Diagnostics;
 
 namespace Chip8.Components;
 

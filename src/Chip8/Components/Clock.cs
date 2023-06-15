@@ -55,6 +55,12 @@ internal class Clock : IClock
 
     private void TickIfNeeded(TimeSpan time)
     {
+        if (tickLastUpdate == TimeSpan.Zero)
+        {
+            tickLastUpdate = time;
+            return;
+        }
+
         TimeSpan tickInterval = TimeSpan.FromMilliseconds(1000 / (double)ticksPerSecond);
         while ((time - tickLastUpdate) >= tickInterval)
         {
@@ -65,6 +71,12 @@ internal class Clock : IClock
 
     private int GetInstructionsCount(TimeSpan time)
     {
+        if (cpuLastUpdate == TimeSpan.Zero)
+        {
+            cpuLastUpdate = time;
+            return 0;
+        }
+
         TimeSpan difference = time - cpuLastUpdate;
         double ratio = difference / TimeSpan.FromSeconds(1);
         int instructionsCount = Convert.ToInt32(Math.Floor(ratio * cpuInstructionsPerSecond));
