@@ -19,7 +19,7 @@ public class App : Application
             // return;
         }
 
-        // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\test2.ch8";
+        string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\test2.ch8";
         // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\ibm.ch8";
         // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\maze-alt.ch8";
         // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\particle.ch8";
@@ -27,7 +27,7 @@ public class App : Application
         // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\pong.ch8";
         // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\breakout.ch8";
         // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\space.ch8";
-        string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\tetris.ch8";
+        // string romPath = "C:\\Progetti\\Chip8\\src\\Chip8.Wpf\\Roms\\tetris.ch8";
         App app = new App(romPath);
         app.Run();
     }

@@ -42,7 +42,6 @@ public class Processor : IProcessor
 
     private static ProgramCounterHint ExecuteOpcode(Opcode op, IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
-        // Debug.WriteLine(registers.ProgramCounter.GetValue() + ": " + op.ToString());
         return op switch
         {
             (0, 0, E, 0) => _00E0.Execute(frameBuffer),
@@ -61,9 +60,9 @@ public class Processor : IProcessor
             (8, _, _, 3) => _8XY3.Execute(registers, op.X, op.Y),
             (8, _, _, 4) => _8XY4.Execute(registers, op.X, op.Y),
             (8, _, _, 5) => _8XY5.Execute(registers, op.X, op.Y),
-            (8, _, _, 6) => _8XY6.Execute(registers, op.X, op.Y),
+            (8, _, _, 6) => _8XY6.Execute(registers, op.X),
             (8, _, _, 7) => _8XY7.Execute(registers, op.X, op.Y),
-            (8, _, _, E) => _8XYE.Execute(registers, op.X, op.Y),
+            (8, _, _, E) => _8XYE.Execute(registers, op.X),
             (9, _, _, 0) => _9XY0.Execute(registers, op.X, op.Y),
             (A, _, _, _) => _ANNN.Execute(registers, op.NNN),
             (B, _, _, _) => _BNNN.Execute(registers, op.NNN),
