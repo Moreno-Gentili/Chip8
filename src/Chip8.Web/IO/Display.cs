@@ -1,5 +1,4 @@
-using Blazor.Extensions;
-using Blazor.Extensions.Canvas.Canvas2D;
+using Aptacode.BlazorCanvas;
 using Chip8.Model.Components;
 using Chip8.Model.IO;
 
@@ -7,24 +6,23 @@ namespace Chip8.Web.IO;
 
 public class Display : IDisplay
 {
-    private readonly Canvas2DContext context;
+    private readonly BlazorCanvas canvas;
     private readonly int width;
     private readonly int height;
 
-    public Display(Canvas2DContext context, long width, long height)
+    public Display(BlazorCanvas canvas, long width, long height)
     {
-        this.context = context;
+        this.canvas = canvas;
         this.width = Convert.ToInt32(width);
         this.height = Convert.ToInt32(height);
     }
 
     public string Color { get; set; } = "green";
 
-    public async Task Render(IFrameBuffer frameBuffer)
+    public void Render(IFrameBuffer frameBuffer)
     {
-        await context.BeginBatchAsync();
-        await context.ClearRectAsync(0, 0, width, height);
-        await context.SetFillStyleAsync(Color);
+        canvas.ClearRect(0, 0, width, height);
+        canvas.FillStyle(Color);
         // await context.SetShadowBlurAsync(10);
         // await context.SetShadowColorAsync(Color);
 
@@ -38,11 +36,9 @@ public class Display : IDisplay
                 bool isPixelOn = frameBuffer[x, y];
                 if (isPixelOn)
                 {
-                    await context.FillRectAsync(x * factorX, y * factorY, factorX, factorY);
+                    canvas.FillRect(x * factorX, y * factorY, factorX, factorY);
                 }
             }
         }
-
-        await context.EndBatchAsync();
     }
 }

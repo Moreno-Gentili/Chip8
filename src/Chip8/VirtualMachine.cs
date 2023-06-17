@@ -92,7 +92,7 @@ public class VirtualMachine : IVirtualMachine
         }
     }
 
-    public async Task Cycle(TimeSpan time)
+    public void Cycle(TimeSpan time)
     {
         bool shouldRedraw = false;
         int instructionsCount = clock.Update(time);
@@ -108,7 +108,7 @@ public class VirtualMachine : IVirtualMachine
 
         if (shouldRedraw)
         {
-            await display.Render(frameBuffer);
+            display.Render(frameBuffer);
         }
     }
 

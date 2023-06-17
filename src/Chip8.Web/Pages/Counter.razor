@@ -1,6 +1,5 @@
 ﻿@page "/counter"
-@using Blazor.Extensions
-@using Blazor.Extensions.Canvas.Canvas2D
+@using Aptacode.BlazorCanvas;
 @using Chip8
 @using Chip8.Model
 @using Chip8.Web.IO;
@@ -19,11 +18,13 @@
     }
 </select>
 <button @onclick="Reset">Reset</button>
-<BECanvas Width="640" Height="320" @ref="canvas"></BECanvas>
+    <BlazorCanvas @ref="canvas">
+        <canvas width="640" height="320"></canvas>
+    </BlazorCanvas>
 </div>
 
 @code {
-    BECanvasComponent canvas;
+    BlazorCanvas canvas;
     SortedDictionary<string, string> roms = new SortedDictionary<string, string>
     {
         { "Breakout", "https://github.com/badlogic/chip8/blob/master/roms/breakout.rom?raw=true" }
@@ -44,7 +45,7 @@
         if (rom is not null)
         {
             await cassette.Change(rom);
-            vm.Reset();
+            Reset();
         }
     }
 
@@ -53,26 +54,29 @@
         if (!firstRender)
             return;
 
-        Canvas2DContext context = await canvas.CreateCanvas2DAsync();
-
         cassette = new();
         speaker = new(new ActionBlock<bool>(SetBuzzer));
-        display = new(context, canvas.Width, canvas.Height);
+        display = new(canvas, 640, 320);
         keyboard = new();
 
-        vm = VirtualMachine.Create(cassette, keyboard, display, speaker);
+        Reset();
 
         await JsRuntime.InvokeAsync<object>("initEmulator", DotNetObjectReference.Create(this));
     }
 
     [JSInvokable]
-    public async Task Cycle(float timeStamp)
+    public void Cycle(float timeStamp)
     {
+        if (!canvas.Ready)
+        {
+            return;
+        }
+
         fps = Convert.ToInt32(1000 / (timeStamp - lastTimestamp));
 
         lastTimestamp = timeStamp;
 
-        await vm.Cycle(TimeSpan.FromMilliseconds(timeStamp));
+        vm.Cycle(TimeSpan.FromMilliseconds(timeStamp));
 
         StateHasChanged();
     }
@@ -91,7 +95,7 @@
 
     public void Reset()
     {
-        vm.Reset();
+        vm = VirtualMachine.Create(cassette, keyboard, display, speaker);
     }
 
     public async void SelectRom(InputFileChangeEventArgs e)

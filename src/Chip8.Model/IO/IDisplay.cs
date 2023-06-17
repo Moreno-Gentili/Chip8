@@ -6,5 +6,5 @@ namespace Chip8.Model.IO;
 // of the display and (63, 31) is located at the bottom-right. 
 public interface IDisplay
 {
-    Task Render(IFrameBuffer frameBuffer);
+    void Render(IFrameBuffer frameBuffer);
 }
