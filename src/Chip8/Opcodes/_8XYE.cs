@@ -4,10 +4,10 @@ namespace Chip8.Opcodes;
 
 public static class _8XYE
 {
-    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterId x)
     {
         IRegisterV registerX = registers.V[x];
-        IRegisterV registerF = registers.V[RegisterName.VF];
+        IRegisterV registerF = registers.V[RegisterId.VF];
 
         byte valueX = registerX.GetValue();
         byte shiftedOut = Convert.ToByte(valueX >> 7);

@@ -1,0 +1,107 @@
+﻿@page "/counter"
+@using Blazor.Extensions
+@using Blazor.Extensions.Canvas.Canvas2D
+@using Chip8
+@using Chip8.Model
+@using Chip8.Web.IO;
+@using System.Threading.Tasks.Dataflow;
+@inject IJSRuntime JsRuntime;
+
+<PageTitle>Counter</PageTitle>
+
+<h1>@fps</h1>
+<div>
+    <InputFile OnChange="SelectRom" class="btn-primary" />
+    <select @onchange="LoadRom">
+    @foreach (var entry in roms)
+    {
+    <option value="@entry.Value">@entry.Key</option>
+    }
+</select>
+<button @onclick="Reset">Reset</button>
+<BECanvas Width="640" Height="320" @ref="canvas"></BECanvas>
+</div>
+
+@code {
+    BECanvasComponent canvas;
+    SortedDictionary<string, string> roms = new SortedDictionary<string, string>
+    {
+        { "Breakout", "https://github.com/badlogic/chip8/blob/master/roms/breakout.rom?raw=true" }
+    };
+
+    IVirtualMachine vm;
+    Cassette cassette;
+    Speaker speaker;
+    Display display;
+    Keyboard keyboard;
+
+    float lastTimestamp = 0;
+    int fps = 0;
+
+    private async Task LoadRom(ChangeEventArgs args)
+    {
+        string? rom = args.Value?.ToString();
+        if (rom is not null)
+        {
+            await cassette.Change(rom);
+            vm.Reset();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        Canvas2DContext context = await canvas.CreateCanvas2DAsync();
+
+        cassette = new();
+        speaker = new(new ActionBlock<bool>(SetBuzzer));
+        display = new(context, canvas.Width, canvas.Height);
+        keyboard = new();
+
+        vm = VirtualMachine.Create(cassette, keyboard, display, speaker);
+
+        await JsRuntime.InvokeAsync<object>("initEmulator", DotNetObjectReference.Create(this));
+    }
+
+    [JSInvokable]
+    public async Task Cycle(float timeStamp)
+    {
+        fps = Convert.ToInt32(1000 / (timeStamp - lastTimestamp));
+
+        lastTimestamp = timeStamp;
+
+        await vm.Cycle(TimeSpan.FromMilliseconds(timeStamp));
+
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void HandleKeyDown(string key)
+    {
+        keyboard.HandleKeyDown(key);
+    }
+
+    [JSInvokable]
+    public void HandleKeyUp(string key)
+    {
+        keyboard.HandleKeyUp(key);
+    }
+
+    public void Reset()
+    {
+        vm.Reset();
+    }
+
+    public async void SelectRom(InputFileChangeEventArgs e)
+    {
+        await cassette.Change(e.File.OpenReadStream());
+        vm.Reset();
+    }
+
+    private async Task SetBuzzer(bool on)
+    {
+        await JsRuntime.InvokeVoidAsync("setBuzzer", on);
+    }
+}

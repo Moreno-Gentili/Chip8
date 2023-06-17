@@ -7,11 +7,11 @@ public static class _8XY4
     private const byte carry = 1;
     private const byte noCarry = 0;
 
-    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, RegisterName y)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterId x, RegisterId y)
     {
         IRegisterV registerX = registers.V[x];
         IRegisterV registerY = registers.V[y];
-        IRegisterV registerF = registers.V[RegisterName.VF];
+        IRegisterV registerF = registers.V[RegisterId.VF];
 
         byte valueX = registerX.GetValue();
         byte valueY = registerY.GetValue();

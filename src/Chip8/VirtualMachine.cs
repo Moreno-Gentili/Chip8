@@ -20,6 +20,7 @@ public class VirtualMachine : IVirtualMachine
     private readonly ITimers timers;
     private readonly IProcessor processor;
     private readonly IFont font;
+    private readonly ISpeaker speaker;
 
     // IO
     private readonly ICassette cassette;
@@ -44,15 +45,33 @@ public class VirtualMachine : IVirtualMachine
         this.cassette = cassette;
         this.keyboard = keyboard;
         this.display = display;
+        this.speaker = speaker;
 
         Reset();
     }
 
     public void Reset()
     {
+        clock.Reset();
+        timers.DelayTimer.SetValue(0);
+        timers.SoundTimer.SetValue(0);
+        registers.StackPointer.SetValue(0);
+        speaker.SetBuzzer(false);
+
         Clear(memory);
-        LoadFont(font, registers, addressableMemory);   
-        LoadProgram(cassette, registers, addressableMemory);
+        SetProgramCounter(registers, addressableMemory, addressableMemory.FontRange);
+        LoadFont(font, registers, addressableMemory);
+
+        SetProgramCounter(registers, addressableMemory, addressableMemory.ProgramRange);
+
+        try
+        {
+            LoadProgram(cassette, registers, addressableMemory);
+        }
+        catch
+        {
+            LoadNoopProgram(registers, addressableMemory);
+        }
     }
 
     public static IVirtualMachine Create(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker)
@@ -73,7 +92,7 @@ public class VirtualMachine : IVirtualMachine
         }
     }
 
-    public void Update(TimeSpan time)
+    public async Task Cycle(TimeSpan time)
     {
         bool shouldRedraw = false;
         int instructionsCount = clock.Update(time);
@@ -89,7 +108,7 @@ public class VirtualMachine : IVirtualMachine
 
         if (shouldRedraw)
         {
-            display.Show(frameBuffer);
+            await display.Render(frameBuffer);
         }
     }
 
@@ -101,12 +120,14 @@ public class VirtualMachine : IVirtualMachine
         }
     }
 
+    private static void SetProgramCounter(IRegisters registers, IAddressableMemory addressableMemory, Range range)
+    {
+        ushort programLocation = Convert.ToUInt16(range.Start.Value);
+        registers.ProgramCounter.SetValue(programLocation);
+    }
+
     private static void LoadProgram(ICassette cassette, IRegisters registers, IAddressableMemory addressableMemory)
     {
-        ushort programLocation = Convert.ToUInt16(addressableMemory.ProgramRange.Start.Value);
-        registers.ProgramCounter.SetValue(programLocation);
-        registers.StackPointer.SetValue(0);
-
         Memory<byte> program = cassette.Load();
         addressableMemory.Write(registers.ProgramCounter, program);
     }
@@ -121,5 +142,19 @@ public class VirtualMachine : IVirtualMachine
         {
             addressableMemory.WriteSprite(font.Digits[(FontDigit)i], registers.ProgramCounter);
         }
+    }
+
+    private static void LoadNoopProgram(IRegisters registers, IAddressableMemory addressableMemory)
+    {
+        byte[] jumpToSelf = GetJumpToSelfOpcode(addressableMemory);
+        addressableMemory.Write(registers.ProgramCounter, jumpToSelf);
+    }
+
+    private static byte[] GetJumpToSelfOpcode(IAddressableMemory addressableMemory)
+    {
+        ushort value = Convert.ToUInt16(addressableMemory.ProgramRange.Start.Value | 0x1000);
+        byte byte1 = Convert.ToByte(value >> 8);
+        byte byte2 = Convert.ToByte(value & 0xFF);
+        return new[] { byte1, byte2 };
     }
 }

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Chip8.Web</title>
+    <base href="/" />
+    <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+</head>
+
+<body>
+    <div id="app">
+        <span class="nes-text">Loading...</span>
+        <progress id="progressbar" class="nes-progress is-pattern is-dark" value="0" max="100"></progress>
+    </div>
+
+    <audio id="buzzer" autoplay loop muted><source src="/audio/buzz.mp3" /></audio>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        function StartBlazor() {
+            let loadedCount = 0;
+            const resourcesToLoad = [];
+            Blazor.start({
+                loadBootResource:
+                    function (type, filename, defaultUri, integrity) {
+                        if (type == "dotnetjs")
+                            return defaultUri;
+
+                        const fetchResources = fetch(defaultUri, {
+                            cache: 'no-cache',
+                            integrity: integrity
+                        });
+
+                        resourcesToLoad.push(fetchResources);
+
+                        fetchResources.then((r) => {
+                            loadedCount += 1;
+                            if (filename == "blazor.boot.json")
+                                return;
+                            const totalCount = resourcesToLoad.length;
+                            const percentLoaded = 10 + parseInt((loadedCount * 90.0) / totalCount);
+                            const progressbar = document.getElementById('progressbar');
+                            progressbar.value = percentLoaded;
+                        });
+
+                        return fetchResources;
+                    }
+            });
+        }
+
+        StartBlazor();
+    </script>
+
+    <script src="_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js"></script>
+    <script>
+        function cycle(timeStamp) {
+            window.requestAnimationFrame(cycle);
+            window.emulator.invokeMethodAsync('Cycle', timeStamp);
+        }
+
+        window.initEmulator = (emulator) => {
+            window.emulator = emulator;
+
+            window.addEventListener('keydown', ({ key }) => {
+                window.emulator.invokeMethodAsync('HandleKeyDown', key.toLowerCase());
+            });
+
+            window.addEventListener('keyup', ({ key }) => {
+                window.emulator.invokeMethodAsync('HandleKeyUp', key.toLowerCase());
+            });
+
+            window.requestAnimationFrame(cycle);
+        };
+
+        window.setBuzzer = (on) => {
+            document.getElementById('buzzer').muted = !on;
+        };
+    </script>
+</body>
+
+</html>

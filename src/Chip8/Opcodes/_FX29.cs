@@ -5,7 +5,7 @@ namespace Chip8.Opcodes;
 
 public static class _FX29
 {
-    public static ProgramCounterHint Execute(IRegisters registers, IFont font, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, IFont font, RegisterId x)
     {
         IRegisterV registerX = registers.V[x];
         FontDigit valueX = (FontDigit)registerX.GetValue();

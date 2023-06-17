@@ -5,7 +5,7 @@ namespace Chip8.Opcodes;
 
 public static class _FX0A
 {
-    public static ProgramCounterHint Execute(IRegisters registers, IKeyboard keyboard, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, IKeyboard keyboard, RegisterId x)
     {
         if (!keyboard.PressedKey.HasValue)
         {

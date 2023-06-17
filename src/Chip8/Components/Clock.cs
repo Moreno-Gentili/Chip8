@@ -47,6 +47,12 @@ internal class Clock : IClock
         }
     }
 
+    public void Reset()
+    {
+        tickLastUpdate = TimeSpan.Zero;
+        cpuLastUpdate = TimeSpan.Zero;
+    }
+
     public int Update(TimeSpan time)
     {
         TickIfNeeded(time);   

@@ -48,14 +48,14 @@ public class RegisterVCollection : MemoryComponent, IRegisterVCollection
         v = Enumerable.Range(0, memory.Length / MemorySize).Select(i => (IRegisterV)Register8.AllocateFrom(ref memory)).ToArray();
     }
 
-    public IRegisterV this[RegisterName registerName] => v[(int) registerName];
+    public IRegisterV this[RegisterId registerId] => v[(int) registerId];
 
-    public Memory<byte> this[RegisterName fromRegisterName, RegisterName toRegisterName]
+    public Memory<byte> this[RegisterId fromRegisterId, RegisterId toRegisterId]
     {
         get
         {
-            byte lowerInclusiveBound = Convert.ToByte(fromRegisterName);
-            byte upperExclusiveBound = Convert.ToByte(toRegisterName + 1);
+            byte lowerInclusiveBound = Convert.ToByte(fromRegisterId);
+            byte upperExclusiveBound = Convert.ToByte(toRegisterId + 1);
             return memory[lowerInclusiveBound..upperExclusiveBound];
         }
 

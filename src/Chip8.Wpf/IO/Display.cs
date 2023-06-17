@@ -125,7 +125,7 @@ public class Display : Window, IDisplay, IKeyboard
         return scanlines;
     }
 
-    public void Show(IFrameBuffer frameBuffer)
+    public Task Show(IFrameBuffer frameBuffer)
     {
         for (byte x = 0; x < frameBuffer.Width; x++)
         {
@@ -136,5 +136,6 @@ public class Display : Window, IDisplay, IKeyboard
         }
 
         InvalidateVisual();
+        return Task.CompletedTask;
     }
 }

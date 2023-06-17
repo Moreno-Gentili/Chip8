@@ -12,8 +12,8 @@ public class Opcode : MemoryComponent
 
     public static int MemorySize => sizeof(ushort);
 
-    public RegisterName X => (RegisterName)Nibble2;
-    public RegisterName Y => (RegisterName)Nibble3;
+    public RegisterId X => (RegisterId)Nibble2;
+    public RegisterId Y => (RegisterId)Nibble3;
     public byte N => Nibble4;
     public byte NN => Convert.ToByte((Nibble3 << 4) + Nibble4);
     public ushort NNN => Convert.ToUInt16((Nibble2 << 8) + NN);

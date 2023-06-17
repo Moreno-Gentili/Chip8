@@ -4,7 +4,7 @@ namespace Chip8.Opcodes;
 
 public static class _8XY1
 {
-    public static ProgramCounterHint Execute(IRegisters registers, RegisterName x, RegisterName y)
+    public static ProgramCounterHint Execute(IRegisters registers, RegisterId x, RegisterId y)
     {
         IRegisterV registerX = registers.V[x];
         IRegisterV registerY = registers.V[y];

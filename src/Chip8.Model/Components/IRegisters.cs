@@ -22,8 +22,8 @@ public interface IRegisterV : IRegister<byte>
 
 public interface IRegisterVCollection
 {
-    IRegisterV this[RegisterName registerName] { get; }
-    Memory<byte> this[RegisterName fromRegisterName, RegisterName toRegisterName] { get; set; }
+    IRegisterV this[RegisterId registerId] { get; }
+    Memory<byte> this[RegisterId fromRegisterId, RegisterId toRegisterId] { get; set; }
 }
 
 public interface IRegisterI : IRegister<ushort>
@@ -38,7 +38,7 @@ public interface IStackPointer : IRegister<byte>
 {
 }
 
-public enum RegisterName : byte
+public enum RegisterId : byte
 {
     V0 = 0,
     V1 = 1,

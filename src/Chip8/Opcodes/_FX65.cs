@@ -4,9 +4,9 @@ namespace Chip8.Opcodes;
 
 public static class _FX65
 {
-    public static ProgramCounterHint Execute(IRegisters registers, IAddressableMemory addressableMemory, RegisterName x)
+    public static ProgramCounterHint Execute(IRegisters registers, IAddressableMemory addressableMemory, RegisterId x)
     {
-        registers.V[RegisterName.V0, x] = addressableMemory.Read(registers.I, Convert.ToUInt16(x + 1));
+        registers.V[RegisterId.V0, x] = addressableMemory.Read(registers.I, Convert.ToUInt16(x + 1));
         
         return ProgramCounterHint.Advance;
     }
