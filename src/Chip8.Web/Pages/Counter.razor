@@ -1,14 +1,15 @@
 ﻿@page "/counter"
-@using Aptacode.BlazorCanvas;
+@using Aptacode.BlazorCanvas
 @using Chip8
 @using Chip8.Model
-@using Chip8.Web.IO;
-@using System.Threading.Tasks.Dataflow;
-@inject IJSRuntime JsRuntime;
+@using Chip8.Web.IO
+@using System.Threading.Tasks.Dataflow
+@inject IJSRuntime JsRuntime
 
 <PageTitle>Counter</PageTitle>
 
-<h1>@fps</h1>
+<h1>Chip8</h1>
+<button @onclick="ToggleAudio">@audioText</button>
 <div>
     <InputFile OnChange="SelectRom" class="btn-primary" />
     <select @onchange="LoadRom">
@@ -35,9 +36,16 @@
     Speaker speaker;
     Display display;
     Keyboard keyboard;
+    bool hasAudio = false;
+    string audioText = "Unmute";
 
     float lastTimestamp = 0;
-    int fps = 0;
+    private async void ToggleAudio()
+    {
+        hasAudio = !hasAudio;
+        audioText = hasAudio ? "Mute" : "Unmute";
+        await JsRuntime.InvokeVoidAsync("toggleAudio", hasAudio);
+    }
 
     private async Task LoadRom(ChangeEventArgs args)
     {
@@ -72,13 +80,7 @@
             return;
         }
 
-        fps = Convert.ToInt32(1000 / (timeStamp - lastTimestamp));
-
-        lastTimestamp = timeStamp;
-
         vm.Cycle(TimeSpan.FromMilliseconds(timeStamp));
-
-        StateHasChanged();
     }
 
     [JSInvokable]
@@ -101,11 +103,19 @@
     public async void SelectRom(InputFileChangeEventArgs e)
     {
         await cassette.Change(e.File.OpenReadStream());
-        vm.Reset();
+        Reset();
     }
 
     private async Task SetBuzzer(bool on)
     {
-        await JsRuntime.InvokeVoidAsync("setBuzzer", on);
+        try
+        {
+            
+            await JsRuntime.InvokeVoidAsync(on ? "playAudio" : "stopAudio");
+        }
+        catch (Exception exc)
+        {
+            Console.WriteLine(exc.Message);
+        }
     }
 }

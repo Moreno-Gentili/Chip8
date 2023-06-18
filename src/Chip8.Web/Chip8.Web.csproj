@@ -17,8 +17,4 @@
     <ProjectReference Include="..\Chip8\Chip8.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\audio\" />
-  </ItemGroup>
-
 </Project>

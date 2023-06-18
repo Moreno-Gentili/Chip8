@@ -20,7 +20,6 @@ public class VirtualMachine : IVirtualMachine
     private readonly ITimers timers;
     private readonly IProcessor processor;
     private readonly IFont font;
-    private readonly ISpeaker speaker;
 
     // IO
     private readonly ICassette cassette;
@@ -45,25 +44,18 @@ public class VirtualMachine : IVirtualMachine
         this.cassette = cassette;
         this.keyboard = keyboard;
         this.display = display;
-        this.speaker = speaker;
 
         Reset();
     }
 
-    public void Reset()
+    private void Reset()
     {
-        clock.Reset();
-        timers.DelayTimer.SetValue(0);
-        timers.SoundTimer.SetValue(0);
-        registers.StackPointer.SetValue(0);
-        speaker.SetBuzzer(false);
-
         Clear(memory);
+
         SetProgramCounter(registers, addressableMemory, addressableMemory.FontRange);
         LoadFont(font, registers, addressableMemory);
 
         SetProgramCounter(registers, addressableMemory, addressableMemory.ProgramRange);
-
         try
         {
             LoadProgram(cassette, registers, addressableMemory);
