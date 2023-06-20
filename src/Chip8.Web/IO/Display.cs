@@ -17,7 +17,7 @@ public class Display : IDisplay
         this.height = Convert.ToInt32(height);
     }
 
-    public string Color { get; set; } = "green";
+    public string Color { get; set; } = "lime";
 
     public void Render(IFrameBuffer frameBuffer)
     {
@@ -38,6 +38,17 @@ public class Display : IDisplay
                 {
                     canvas.FillRect(x * factorX, y * factorY, factorX, factorY);
                 }
+            }
+        }
+
+        bool isCrt = true;
+        if (isCrt)
+        {
+
+            canvas.FillStyle("rgba(0, 0, 0, 0.9)");
+            for (byte y = 0; y < frameBuffer.Height; y++)
+            {
+                canvas.FillRect(0, (y + 1) * factorY - 1, width, 2);
             }
         }
     }

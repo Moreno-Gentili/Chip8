@@ -20,7 +20,7 @@
 </select>
 <button @onclick="Reset">Reset</button>
     <BlazorCanvas @ref="canvas">
-        <canvas width="640" height="320"></canvas>
+        <canvas id="display" width="640" height="320"></canvas>
     </BlazorCanvas>
 </div>
 
@@ -28,7 +28,8 @@
     BlazorCanvas canvas;
     SortedDictionary<string, string> roms = new SortedDictionary<string, string>
     {
-        { "Breakout", "https://github.com/badlogic/chip8/blob/master/roms/breakout.rom?raw=true" }
+        { "", "" },
+        { "Breakout", "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Airplane.ch8" }
     };
 
     IVirtualMachine vm;
@@ -108,14 +109,6 @@
 
     private async Task SetBuzzer(bool on)
     {
-        try
-        {
-            
-            await JsRuntime.InvokeVoidAsync(on ? "playAudio" : "stopAudio");
-        }
-        catch (Exception exc)
-        {
-            Console.WriteLine(exc.Message);
-        }
+        await JsRuntime.InvokeVoidAsync(on ? "playAudio" : "stopAudio");
     }
 }
