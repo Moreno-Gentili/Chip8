@@ -24,41 +24,6 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
-    <script>
-        function StartBlazor() {
-            let loadedCount = 0;
-            const resourcesToLoad = [];
-            Blazor.start({
-                loadBootResource:
-                    function (type, filename, defaultUri, integrity) {
-                        if (type == "dotnetjs")
-                            return defaultUri;
-
-                        const fetchResources = fetch(defaultUri, {
-                            cache: 'no-cache',
-                            integrity: integrity
-                        });
-
-                        resourcesToLoad.push(fetchResources);
-
-                        fetchResources.then((r) => {
-                            loadedCount += 1;
-                            if (filename == "blazor.boot.json")
-                                return;
-                            const totalCount = resourcesToLoad.length;
-                            const percentLoaded = 10 + parseInt((loadedCount * 90.0) / totalCount);
-                            const progressbar = document.getElementById('progressbar');
-                            progressbar.value = percentLoaded;
-                        });
-
-                        return fetchResources;
-                    }
-            });
-        }
-
-        StartBlazor();
-    </script>
-
     <script src="_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js"></script>
     <script>
         function cycle(timeStamp) {
@@ -131,13 +96,24 @@
         window.renderCrt = function () {
 
             const scene = new THREE.Scene();
-            const renderer = new THREE.WebGLRenderer();
+            const renderer = new THREE.WebGLRenderer({ alpha: true });
 
-            const canvas = document.getElementById('display');
-            const geometry = new THREE.PlaneGeometry(2, 1);
+            const canvas = document.querySelector('#lcd canvas');
+            const geometry = new THREE.PlaneGeometry(2.3, 1);
             // const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-            const material = new THREE.MeshBasicMaterial();
-            material.map = new THREE.CanvasTexture(canvas);
+
+            //const material = new THREE.MeshBasicMaterial();
+            //material.map = new THREE.CanvasTexture(canvas);
+
+            const canvasTexture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshStandardMaterial({
+                color: new THREE.Color(0, 255, 0),
+                map: canvasTexture,
+                transparent: true,
+                emissiveIntensity: 0.0045,
+                emissive: new THREE.Color(0, 255, 0),
+                emissiveMap: canvasTexture
+            });
 
             const cube = new THREE.Mesh(geometry, material);
             scene.add(cube);
@@ -157,9 +133,9 @@
             effect.renderToScreen = true;
 
             // Setup distortion effect
-            var horizontalFOV = 80;
+            var horizontalFOV = 85;
             var strength = 0.85;
-            var cylindricalRatio = 0.7;
+            var cylindricalRatio = 0.9;
             var height = Math.tan(THREE.MathUtils.degToRad(horizontalFOV) / 2) / camera.aspect;
 
             camera.fov = Math.atan(height) * 2 * 180 / 3.1415926535;
@@ -171,11 +147,8 @@
             effect.uniforms["aspectRatio"].value = camera.aspect;
             effect.uniforms["cylindricalRatio"].value = cylindricalRatio;
 
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.domElement.style.border = "1px solid red";
-            renderer.domElement.style.width = "640px";
-            renderer.domElement.style.height = "320px";
-            document.body.appendChild(renderer.domElement);
+            renderer.setSize(640, 320);
+            document.getElementById('crt').appendChild(renderer.domElement);
 
             animate.bind(this, () => {
                 material.map.needsUpdate = true;
@@ -241,6 +214,40 @@
             render();
         }
 
+    </script>
+    <script>
+        function StartBlazor() {
+            let loadedCount = 0;
+            const resourcesToLoad = [];
+            Blazor.start({
+                loadBootResource:
+                    function (type, filename, defaultUri, integrity) {
+                        if (type == "dotnetjs")
+                            return defaultUri;
+
+                        const fetchResources = fetch(defaultUri, {
+                            cache: 'no-cache',
+                            integrity: integrity
+                        });
+
+                        resourcesToLoad.push(fetchResources);
+
+                        fetchResources.then((r) => {
+                            loadedCount += 1;
+                            if (filename == "blazor.boot.json")
+                                return;
+                            const totalCount = resourcesToLoad.length;
+                            const percentLoaded = 10 + parseInt((loadedCount * 90.0) / totalCount);
+                            const progressbar = document.getElementById('progressbar');
+                            progressbar.value = percentLoaded;
+                        });
+
+                        return fetchResources;
+                    }
+            });
+        }
+
+        StartBlazor();
     </script>
 </body>
 

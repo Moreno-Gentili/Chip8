@@ -86,10 +86,9 @@ public class VirtualMachine : IVirtualMachine
 
     public void Cycle(TimeSpan time)
     {
-        bool shouldRedraw = false;
         int instructionsCount = clock.Update(time);
 
-        for (int i = 0; i < instructionsCount; i++, shouldRedraw = true)
+        for (int i = 0; i < instructionsCount; i++)
         {
             ProgramCounterHint result = processor.ExecuteOpcode(addressableMemory, frameBuffer, stack, registers, timers, font, keyboard);
             if (result == ProgramCounterHint.WaitForKey)
@@ -98,10 +97,7 @@ public class VirtualMachine : IVirtualMachine
             }
         }
 
-        if (shouldRedraw)
-        {
-            display.Render(frameBuffer);
-        }
+        display.Render(frameBuffer, time);
     }
 
     private static void Clear(Memory<byte> memory)
