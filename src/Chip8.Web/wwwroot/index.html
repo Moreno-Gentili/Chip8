@@ -4,12 +4,14 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Chip8.Web</title>
+    <title>CHIP-8 emulator on Blazor WebAssembly</title>
     <base href="/" />
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta property="og:title" content="CHIP-8 emulator on Blazor WebAssembly" />
+    <meta property="og:image" content="/preview.gif" />
 </head>
 
 <body>
@@ -24,11 +26,10 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
-    <script src="_content/Blazor.Extensions.Canvas/blazor.extensions.canvas.js"></script>
     <script>
         function cycle(timeStamp) {
             window.requestAnimationFrame(cycle);
-            window.emulator.invokeMethodAsync('Cycle', timeStamp);
+            window.emulator.invokeMethodAsync('Update', timeStamp);
         }
 
         function initEmulator(emulator) {
@@ -73,6 +74,10 @@
                 audioOscillator.disconnect();
             }
         }
+
+        function showError() {
+            document.getElementById('error').showDialog();
+        }
     </script>
 
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -89,9 +94,7 @@
         import * as THREE from 'three';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass';
-        import { MaskPass } from 'three/addons/postprocessing/MaskPass';
         import { ShaderPass } from 'three/addons/postprocessing/ShaderPass';
-        import { CopyShader } from 'three/addons/shaders/CopyShader';
 
         window.renderCrt = function () {
 

@@ -13,9 +13,9 @@ public class VirtualMachine : IVirtualMachine
     // Components
     private readonly Clock clock;
     private readonly Memory<byte> memory;
+    private readonly Stack stack;
     private readonly IAddressableMemory addressableMemory;
     private readonly IFrameBuffer frameBuffer;
-    private readonly IStack stack;
     private readonly IRegisters registers;
     private readonly ITimers timers;
     private readonly IProcessor processor;
@@ -84,7 +84,7 @@ public class VirtualMachine : IVirtualMachine
         }
     }
 
-    public void Cycle(TimeSpan time)
+    public void Update(TimeSpan time)
     {
         int instructionsCount = clock.Update(time);
 
@@ -98,6 +98,38 @@ public class VirtualMachine : IVirtualMachine
         }
 
         display.Render(frameBuffer, time);
+    }
+
+    public Dictionary<string, string?> GetState()
+    {
+        Dictionary<string, string?> values = new()
+        {
+            { "I", registers.I.ToString() },
+            { "ST", timers.SoundTimer.ToString() },
+            { "DT", timers.DelayTimer.ToString() },
+            { "PC", registers.ProgramCounter.ToString() },
+            { "SP", registers.StackPointer.ToString() },
+            { "STACK", stack.ToString(registers.StackPointer) },
+            { "V0", registers.V[RegisterId.V0].ToString() },
+            { "V1", registers.V[RegisterId.V1].ToString() },
+            { "V2", registers.V[RegisterId.V2].ToString() },
+            { "V3", registers.V[RegisterId.V3].ToString() },
+            { "V4", registers.V[RegisterId.V4].ToString() },
+            { "V5", registers.V[RegisterId.V5].ToString() },
+            { "V6", registers.V[RegisterId.V6].ToString() },
+            { "V7", registers.V[RegisterId.V7].ToString() },
+            { "V8", registers.V[RegisterId.V8].ToString() },
+            { "V9", registers.V[RegisterId.V9].ToString() },
+            { "VA", registers.V[RegisterId.VA].ToString() },
+            { "VB", registers.V[RegisterId.VB].ToString() },
+            { "VC", registers.V[RegisterId.VC].ToString() },
+            { "VD", registers.V[RegisterId.VD].ToString() },
+            { "VE", registers.V[RegisterId.VE].ToString() },
+            { "VF", registers.V[RegisterId.VF].ToString() }
+        };
+
+        return values;
+
     }
 
     private static void Clear(Memory<byte> memory)
@@ -117,7 +149,16 @@ public class VirtualMachine : IVirtualMachine
     private static void LoadProgram(ICassette cassette, IRegisters registers, IAddressableMemory addressableMemory)
     {
         Memory<byte> program = cassette.Load();
+        EnsureLengthIsValid(program.Length);
         addressableMemory.Write(registers.ProgramCounter, program);
+    }
+
+    private static void EnsureLengthIsValid(int length)
+    {
+        if (length > AddressableMemory.MemorySize)
+        {
+            throw new InvalidOperationException($"ROM is too large. Max size: {AddressableMemory.MemorySize} bytes");
+        }
     }
 
     private static void LoadFont(IFont font, IRegisters registers, IAddressableMemory addressableMemory)

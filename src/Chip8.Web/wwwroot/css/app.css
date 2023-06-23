@@ -1,6 +1,7 @@
 body {
     background-color: #212529;
     color: white;
+    padding: 30px;
 }
 
 .github-link {
@@ -28,7 +29,7 @@ html, body, pre, code, kbd, samp {
 }
 
 #blazor-error-ui {
-    background: lightyellow;
+    background: #131518;
     bottom: 0;
     box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
     display: none;
@@ -52,18 +53,29 @@ html, body, pre, code, kbd, samp {
     position: relative;
 }
 
-#lcd {
-    width: 640px;
-    height: 320px;
-    background-color: black;
+#lcd, #crt {
+    width: 680px;
+    height: 360px;
+    padding: 20px;
+    box-sizing: border-box;
     position: absolute;
+    background-color: #131518;
+}
+
+#lcd {
+    z-index: 1;
 }
 
 #crt {
-    width: 640px;
-    height: 320px;
+    background-color: #212529;
     background-image: url('/crt.png');
-    position: absolute;
+    z-index: 2;
+}
+
+#stack:empty::before
+{
+    content: '--';
+    color: #555;
 }
 
 .blazor-error-boundary {
@@ -74,4 +86,42 @@ html, body, pre, code, kbd, samp {
 
 .blazor-error-boundary::after {
     content: "An error has occurred."
+}
+
+h1
+{
+    font-size: 40px;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+h2
+{
+    font-size: 16px;
+    text-align: center;
+}
+
+#keyboard {
+    width: 240px;
+    display: grid;
+    grid-template-columns: repeat(4, 50px);
+}
+
+#keyboard button {
+    width: 50px;
+    height: 50px;
+}
+
+#debug {
+    font-size: 10px;
+}
+
+#debug dt {
+    display: inline;
+}
+
+#debug dd {
+    color: lime;
+    display: inline;
+    margin-right: 5px;
 }

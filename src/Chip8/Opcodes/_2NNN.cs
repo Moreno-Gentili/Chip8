@@ -7,8 +7,8 @@ public static class _2NNN
 {
     public static ProgramCounterHint Execute(IStack stack, IRegisters registers, ushort nnn)
     {
-        registers.StackPointer.Increment();
         stack.SetAddress(registers.StackPointer, registers.ProgramCounter.GetValue());
+        registers.StackPointer.Increment();
         registers.ProgramCounter.SetValue(nnn);
         return ProgramCounterHint.Stay;
     }

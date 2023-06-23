@@ -14,5 +14,6 @@ public enum ProgramCounterHint
     Advance,
     Stay,
     SkipOneThenAdvance,
-    WaitForKey
+    WaitForKey,
+    Faulted
 }

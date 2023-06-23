@@ -1,6 +1,7 @@
 using Chip8.Components.Base;
 using Chip8.Extensions;
 using Chip8.Model.Components;
+using System.Text.RegularExpressions;
 
 namespace Chip8.Components;
 
@@ -20,13 +21,19 @@ public class Stack : MemoryComponent, IStack
 
     public void SetAddress(IStackPointer stackPointer, ushort address)
     {
-        byte position = Convert.ToByte(stackPointer.GetValue() * sizeof(ushort));
-        BitConverter.GetBytes(address).CopyTo(memory[position..]);
+        byte offset = Convert.ToByte(stackPointer.GetValue() * sizeof(ushort));
+        BitConverter.GetBytes(address).CopyTo(memory[offset..]);
     }
 
     public ushort GetAddress(IStackPointer stackPointer)
     {
-        byte position = Convert.ToByte(stackPointer.GetValue() * sizeof(ushort));
-        return BitConverter.ToUInt16(memory[position..(position + sizeof(ushort))].Span);
+        byte offset = Convert.ToByte(stackPointer.GetValue() * sizeof(ushort));
+        return BitConverter.ToUInt16(memory[offset..(offset + sizeof(ushort))].Span);
+    }
+
+    public string ToString(IStackPointer stackPointer)
+    {
+        string value = base.ToString()[0..(stackPointer.GetValue() * sizeof(ushort) * 2)];
+        return Regex.Replace(value, ".{4}", "$0 ");
     }
 }

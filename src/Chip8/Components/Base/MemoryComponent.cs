@@ -12,4 +12,9 @@ public abstract class MemoryComponent
 
         this.memory = memory;
     }
+
+    public override string ToString()
+    {
+        return Convert.ToHexString(memory.Span);
+    }
 }

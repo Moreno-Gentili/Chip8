@@ -1,4 +1,5 @@
-﻿using Chip8.Model.IO;
+﻿using Chip8.Model.Components;
+using Chip8.Model.IO;
 
 namespace Chip8.Web.IO;
 
