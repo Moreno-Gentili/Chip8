@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aptacode.BlazorCanvas" Version="1.1.10" />
+    <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.5" PrivateAssets="all" />
   </ItemGroup>

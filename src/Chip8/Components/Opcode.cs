@@ -35,9 +35,4 @@ public class Opcode : MemoryComponent
         nibble3 = Nibble3;
         nibble4 = Nibble4;
     }
-
-    public override string? ToString()
-    {
-        return Convert.ToHexString(memory.Span);
-    }
 }

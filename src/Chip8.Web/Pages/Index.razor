@@ -2,10 +2,12 @@
 @using Aptacode.BlazorCanvas
 @using Chip8
 @using Chip8.Model
+@using Chip8.Model.IO;
 @using Chip8.Web.IO
 @using System.Threading.Tasks.Dataflow
 @using Chip8.Web.Model;
 @inject IJSRuntime JsRuntime
+@inject HttpClient http
 
 <PageTitle>CHIP-8 emulator on Blazor Web Assembly</PageTitle>
 <h1>Chip-8</h1>
@@ -17,44 +19,45 @@
 
 <section>
     <header>
-        <InputFile OnChange="LoadRomFromFile" class="btn-primary" />
-        <select @onchange="LoadRomFromHttp">
-            @foreach (var entry in roms)
+        <InputFile @ref="fileSelector" OnChange="LoadRomFromFile" class="btn-primary" />
+        <select @onchange="LoadRom">
+            <option value="-">Load from disk...</option>
+            @foreach (var romGroup in roms.GroupBy(r => r.Group))
             {
-                <option value="@entry.Value">@entry.Key</option>
+                <optgroup label="@romGroup.Key">
+                    @foreach (var rom in romGroup)
+                    {
+                        <option value="@rom.Crc32">rom.Name</option>
+                    }
+                </optgroup>
             }
         </select>
-        <input type="button" class="nes-btn is-error" @onclick="Reset" value="Reset" />
+        <button type="button" class="nes-btn is-error" @onclick="Reset">Reset</button>
+        <p>More ROMs available at https://github.com/kripod/chip8-roms</p>
     </header>
-    <main id="display">
-        <div id="lcd">
-            <BlazorCanvas @ref="canvas">
-                <canvas width="@canvasWidth" height="@canvasHeight" hidden="@(displayType != DisplayType.Lcd)"></canvas>
-            </BlazorCanvas>
-        </div>
-        <div id="crt" hidden="@(displayType != DisplayType.Crt)"></div>
+    <main id="emulator">
+        <article id="display">
+            <div id="lcd">
+                <BlazorCanvas @ref="canvas">
+                    <canvas width="@canvasWidth" height="@canvasHeight" hidden="@(displayType != DisplayType.Lcd)"></canvas>
+                </BlazorCanvas>
+            </div>
+            <div id="crt" hidden="@(displayType != DisplayType.Crt)"></div>
+        </article>
+
+        @if (keyboard is not null)
+        {
+            <aside id="keyboard">
+                @foreach (var entry in keyboard.Keys)
+                {
+                    <button type="button" class="@GetKeyboardButtonClassName(entry.Value)" @onmousedown="() => keyboard.HandleKeyDown(entry.Value)" @onmouseup="() => keyboard.HandleKeyUp(entry.Value)">@entry.Key<span class="alt-key">@GetKeyboardAltKey(entry.Value)</span></button>
+                }
+            </aside>
+        }
     </main>
 
-    <aside id="keyboard">
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button>4</button>
-        <button>Q</button>
-        <button>W</button>
-        <button>E</button>
-        <button>R</button>
-        <button>A</button>
-        <button>S</button>
-        <button>D</button>
-        <button>F</button>
-        <button>Z</button>
-        <button>X</button>
-        <button>C</button>
-        <button>V</button>
-    </aside>
-
     <nav>
+        <img src="/images/display.png" alt="Display" />
         <label>
             <input type="radio" class="nes-radio is-dark" name="answer-dark" checked value="@nameof(DisplayType.Crt)" @onchange="SetDisplay" />
             <span>@nameof(DisplayType.Crt)</span>
@@ -64,110 +67,136 @@
             <input type="radio" class="nes-radio is-dark" name="answer-dark" value="@nameof(DisplayType.Lcd)" @onchange="SetDisplay" />
             <span>@nameof(DisplayType.Lcd)</span>
         </label>
+
+        <img src="/images/audio.png" alt="Audio" />
         <button @onclick="ToggleAudio">@audioText</button>
+
+        <img src="/images/fullscreen.png" alt="Audio" />
     </nav>
 </section>
 
-@if (state != null)
+@if (state is not null && cassette is not null && cassette.Crc32 is not null)
 {
     <footer id="debug">
-        <dl>
-            <dt title="Register I (16 bit)">I</dt>
-            <dd>@state["I"]</dd>
-            <dt title="Program Counter (16 bit)">PC</dt>
-            <dd>@state["PC"]</dd>
-            <dt title="Sound Timer (8 bit)">ST</dt>
-            <dd>@state["ST"]</dd>
-            <dt title="Delay Timer (8 bit)">DT</dt>
-            <dd>@state["DT"]</dd>
-            <dt title="Stack Pointer (8 bit)">SP</dt>
-            <dd>@state["SP"]</dd>
-            <dt title="Stack (16 * 16 bit)">STACK</dt>
-            <dd id="stack">@state["STACK"]</dd>
-        </dl>
+        <details>
+            <summary>Debug</summary>
 
-        <dl>
-            <dt title="Register V0 (8 bit)">V0</dt>
-            <dd>@state["V0"]</dd>
-            <dt title="Register V1 (8 bit)">V1</dt>
-            <dd>@state["V1"]</dd>
-            <dt title="Register V2 (8 bit)">V2</dt>
-            <dd>@state["V2"]</dd>
-            <dt title="Register V3 (8 bit)">V3</dt>
-            <dd>@state["V3"]</dd>
-            <dt title="Register V4 (8 bit)">V4</dt>
-            <dd>@state["V4"]</dd>
-            <dt title="Register V5 (8 bit)">V5</dt>
-            <dd>@state["V5"]</dd>
-            <dt title="Register V6 (8 bit)">V6</dt>
-            <dd>@state["V6"]</dd>
-            <dt title="Register V7 (8 bit)">V7</dt>
-            <dd>@state["V7"]</dd>
-            <dt title="Register V8 (8 bit)">V8</dt>
-            <dd>@state["V8"]</dd>
-            <dt title="Register V9 (8 bit)">V9</dt>
-            <dd>@state["V9"]</dd>
-            <dt title="Register VA (8 bit)">VA</dt>
-            <dd>@state["VA"]</dd>
-            <dt title="Register VB (8 bit)">VB</dt>
-            <dd>@state["VB"]</dd>
-            <dt title="Register VC (8 bit)">VC</dt>
-            <dd>@state["VC"]</dd>
-            <dt title="Register VD (8 bit)">VD</dt>
-            <dd>@state["VD"]</dd>
-            <dt title="Register VE (8 bit)">VE</dt>
-            <dd>@state["VE"]</dd>
-            <dt title="Register VF (8 bit)">VF</dt>
-            <dd>@state["VF"]</dd>
-        </dl>
+            <dl>
+                <dt title="CHECKSUM (32 bit)">CRC32</dt>
+                <dd>@cassette.Crc32</dd>
+                <dt title="OPCODE (16 bit)">OPCODE</dt>
+                <dd id="opcode">@state["OPCODE"]</dd>
+                <dt title="Program Counter (16 bit)">PC</dt>
+                <dd>@state["PC"]</dd>
+                <dt title="Register I (16 bit)">I</dt>
+                <dd>@state["I"]</dd>
+                <dt title="Sound Timer (8 bit)">ST</dt>
+                <dd>@state["ST"]</dd>
+                <dt title="Delay Timer (8 bit)">DT</dt>
+                <dd>@state["DT"]</dd>
+                <dt title="Stack Pointer (8 bit)">SP</dt>
+                <dd>@state["SP"]</dd>
+                <dt title="Stack (16 * 16 bit)">STACK</dt>
+                <dd id="stack">@state["STACK"]</dd>
+            </dl>
+
+            <dl>
+                <dt title="Register V0 (8 bit)">V0</dt>
+                <dd>@state["V0"]</dd>
+                <dt title="Register V1 (8 bit)">V1</dt>
+                <dd>@state["V1"]</dd>
+                <dt title="Register V2 (8 bit)">V2</dt>
+                <dd>@state["V2"]</dd>
+                <dt title="Register V3 (8 bit)">V3</dt>
+                <dd>@state["V3"]</dd>
+                <dt title="Register V4 (8 bit)">V4</dt>
+                <dd>@state["V4"]</dd>
+                <dt title="Register V5 (8 bit)">V5</dt>
+                <dd>@state["V5"]</dd>
+                <dt title="Register V6 (8 bit)">V6</dt>
+                <dd>@state["V6"]</dd>
+                <dt title="Register V7 (8 bit)">V7</dt>
+                <dd>@state["V7"]</dd>
+                <dt title="Register V8 (8 bit)">V8</dt>
+                <dd>@state["V8"]</dd>
+                <dt title="Register V9 (8 bit)">V9</dt>
+                <dd>@state["V9"]</dd>
+                <dt title="Register VA (8 bit)">VA</dt>
+                <dd>@state["VA"]</dd>
+                <dt title="Register VB (8 bit)">VB</dt>
+                <dd>@state["VB"]</dd>
+                <dt title="Register VC (8 bit)">VC</dt>
+                <dd>@state["VC"]</dd>
+                <dt title="Register VD (8 bit)">VD</dt>
+                <dd>@state["VD"]</dd>
+                <dt title="Register VE (8 bit)">VE</dt>
+                <dd>@state["VE"]</dd>
+                <dt title="Register VF (8 bit)">VF</dt>
+                <dd>@state["VF"]</dd>
+            </dl>
+            <nav id="debug-toolbar">
+                <button type="button" id="debug-pause" accesskey="P" title="Toggle pause (ALT+P)" class="@GetTogglePauseClassName()" @onclick="TogglePause"><img src="/images/pause.png" /></button>
+                <button type="button" id="debug-step" accesskey="O" title="Step over (ALT+O)" class="@GetStepOverClassName()" @onclick="Step" disabled="@(shouldStep is null)"><img src="/images/step.png" /></button>
+            </nav>
+        </details>
     </footer>
 }
 
-<dialog class="nes-dialog is-dark is-rounded" id="error">
+<dialog @ref="errorDialog" class="nes-dialog is-dark is-rounded">
     <form method="dialog">
         <p class="title">Error</p>
         <p>@errorText</p>
         <menu class="dialog-menu">
-            <button class="nes-btn is-primary">OK</button>
+            <button class="nes-btn is-success">Close</button>
         </menu>
     </form>
 </dialog>
 
 @code {
-    BlazorCanvas canvas;
-    SortedDictionary<string, string> roms = new SortedDictionary<string, string>
-    {
-        { "", "" },
-        { "Breakout", "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Airplane.ch8" }
-    };
+        const int canvasWidth = 640;
+        const int canvasHeight = 320;
+        BlazorCanvas? canvas;
+        InputFile? fileSelector;
+        ElementReference? errorDialog;
+        Dictionary<char, Key>? additionalKeyMap;
+        Dictionary<Key, char>? reverseAdditionalKeyMap;
+        bool? shouldStep = null;
 
-    IVirtualMachine vm;
-    Cassette cassette;
-    Speaker speaker;
-    Display display;
-    Keyboard keyboard;
-    DisplayType displayType = DisplayType.Crt;
-    bool hasAudio = false;
-    string audioText = "Unmute";
-    float lastTimestamp = 0;
-    bool faulted = false;
-    string errorText = string.Empty;
-    const int canvasWidth = 640;
-    const int canvasHeight = 320;
+        Rom[] roms = new Rom[0];
 
-    Dictionary<string, string?>? state = null;
+        IVirtualMachine? vm;
+        Cassette? cassette;
+        Speaker? speaker;
+        Display? display;
+        Keyboard? keyboard;
+        DisplayType displayType = DisplayType.Crt;
+        bool hasAudio = false;
+        string audioText = "Unmute";
+        TimeSpan lastTimestamp = TimeSpan.Zero;
+        bool faulted = false;
+        string errorText = string.Empty;
 
-    private async void ToggleAudio()
-    {
-        hasAudio = !hasAudio;
-        audioText = hasAudio ? "Mute" : "Unmute";
-        await JsRuntime.InvokeVoidAsync("toggleAudio", hasAudio);
-    }
+        Dictionary<string, string?>? state = null;
+
+        private async void ToggleAudio()
+        {
+            hasAudio = !hasAudio;
+            audioText = hasAudio ? "Mute" : "Unmute";
+            await JsRuntime.InvokeVoidAsync("toggleAudio", hasAudio);
+        }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
             return;
+
+        if (canvas is null)
+        {
+            await ShowError("Canvas is not inizialized");
+            return;
+        }
+
+        roms = await GetRoms();
 
         cassette = new();
         speaker = new(new ActionBlock<bool>(SetBuzzer));
@@ -175,22 +204,35 @@
         display = new(canvas, canvasWidth, canvasHeight);
         display.Connect(displayType);
 
-        await Reset();
         await JsRuntime.InvokeAsync<object>("initEmulator", DotNetObjectReference.Create(this));
+        await Reset();
     }
 
     [JSInvokable]
     public async void Update(float timeStamp)
     {
-        if (!canvas.Ready || faulted)
+        if (canvas?.Ready != true || vm is null || faulted)
         {
             return;
         }
 
         try
         {
-            vm.Update(TimeSpan.FromMilliseconds(timeStamp));
+            TimeSpan? time = GetTime(timeStamp, shouldStep, lastTimestamp, vm.CpuInstructionsPerSecond);
+            if (time is null)
+            {
+                return;
+            }
+
+            lastTimestamp = time.Value;
+            vm.Update(time.Value);
             state = vm.GetState();
+
+            if (shouldStep == true)
+            {
+                shouldStep = false;
+            }
+
             StateHasChanged();
         }
         catch (Exception)
@@ -200,25 +242,54 @@
         }
     }
 
-    [JSInvokable]
-    public void HandleKeyDown(string key)
+    private static TimeSpan? GetTime(float timeStamp, bool? shouldStep, TimeSpan lastTimestamp, int cpuInstructionsPerSecond)
     {
-        keyboard.HandleKeyDown(key);
+        return shouldStep switch
+        {
+            null => TimeSpan.FromMilliseconds(timeStamp),
+            true => lastTimestamp + TimeSpan.FromSeconds(1) / cpuInstructionsPerSecond,
+            false => (TimeSpan?)null,
+        };
     }
 
     [JSInvokable]
-    public void HandleKeyUp(string key)
+    public void HandleKeyDown(string? key)
     {
-        keyboard.HandleKeyUp(key);
+        if (keyboard is null || key is null)
+        {
+            return;
+        }
+
+        keyboard.HandleKeyDown(key[0], additionalKeyMap);
     }
 
-    public async Task Reset()
+    [JSInvokable]
+    public void HandleKeyUp(string? key)
     {
+        if (keyboard is null || key is null)
+        {
+            return;
+        }
+
+        keyboard.HandleKeyUp(key[0], additionalKeyMap);
+    }
+
+    private async Task Reset()
+    {
+        if (cassette is null || keyboard is null || display is null || speaker is null)
+        {
+            await ShowError("IO devices not initialized");
+            return;
+        }
+
         try
         {
             vm = VirtualMachine.Create(cassette, keyboard, display, speaker);
             await SetBuzzer(false);
+            additionalKeyMap = GameKeyMaps.FindGameMapByHash(cassette.Crc32);
+            reverseAdditionalKeyMap = additionalKeyMap?.ToDictionary(entry => entry.Value, entry => entry.Key);
             faulted = false;
+            await JsRuntime.InvokeVoidAsync("clearCanvas");
         }
         catch
         {
@@ -227,8 +298,27 @@
         }
     }
 
+    private async Task<Rom[]> GetRoms()
+    {
+        try
+        {
+            return await http.GetFromJsonAsync<Rom[]>("/data/known-roms.json") ?? throw new InvalidOperationException("Invalid rom data");
+        }
+        catch (Exception exc)
+        {
+            await ShowError(exc.Message);
+            return new Rom[0];
+        }
+    }
+
     private async void LoadRomFromFile(InputFileChangeEventArgs e)
     {
+        if (cassette is null)
+        {
+            await ShowError("Cassette is not ready");
+            return;
+        }
+
         try
         {
             await cassette.Change(e.File.OpenReadStream());
@@ -240,26 +330,52 @@
         }
     }
 
-    private async void LoadRomFromHttp(ChangeEventArgs args)
+    private async void LoadRom(ChangeEventArgs args)
     {
-        string? rom = args.Value?.ToString();
+        Rom? rom = roms.SingleOrDefault(r => r.Crc32 == args.Value?.ToString());
         if (rom is not null)
         {
-            try
-            {
-                await cassette.Change(rom);
-                await Reset();
-            }
-            catch (Exception exc)
-            {
-                await ShowError($"Loading error: {exc.Message}");
-            }
+            await LoadRomFromHttp(rom.Url);
+        }
+        else
+        {
+            // TODO: Load from disk
+            await PromptFileSelection();
+        }
+    }
+
+    private async Task PromptFileSelection()
+    {
+        await JsRuntime.InvokeVoidAsync("promptFileSelection", fileSelector);
+    }
+
+    private async Task LoadRomFromHttp(string url)
+    {
+        if (cassette is null)
+        {
+            await ShowError("Cassette is not ready");
+            return;
+        }
+
+        try
+        {
+            await cassette.Change(url);
+            await Reset();
+        }
+        catch (Exception exc)
+        {
+            await ShowError($"Loading error: {exc.Message}");
         }
     }
 
 
     private void SetDisplay(ChangeEventArgs args)
     {
+        if (display is null)
+        {
+            throw new InvalidOperationException("Display is not ready");
+        }
+
         displayType = Enum.Parse<DisplayType>(args.Value?.ToString() ?? string.Empty);
         display.Connect(displayType);
     }
@@ -272,6 +388,56 @@
     private async Task ShowError(string text)
     {
         errorText = text;
-        await JsRuntime.InvokeVoidAsync("showError");
+        await JsRuntime.InvokeVoidAsync("showError", errorDialog);
+    }
+
+    private string GetKeyboardButtonClassName(Key key)
+    {
+        if (reverseAdditionalKeyMap is null || reverseAdditionalKeyMap.ContainsKey(key))
+        {
+            return "nes-btn";
+        }
+        else
+        {
+            return "nes-btn is-disabled";
+        }
+    }
+
+    private string GetKeyboardAltKey(Key key)
+    {
+        if (reverseAdditionalKeyMap?.TryGetValue(key, out char value) == true)
+        {
+            return value.ToString();
+        }
+
+        return string.Empty;
+    }
+
+    private string GetStepOverClassName()
+    {
+        return $"nes-btn {(shouldStep is null ? "is-disabled" : "")}";
+    }
+
+    private string GetTogglePauseClassName()
+    {
+        return $"nes-btn {(shouldStep is null ? "" : "is-success")}";
+    }
+
+    private void TogglePause()
+    {
+        if (shouldStep is null)
+        {
+            shouldStep = false;
+        }
+        else if (vm is not null)
+        {
+            shouldStep = null;
+            vm.ResetClock();
+        }
+    }
+
+    private void Step()
+    {
+        shouldStep = true;
     }
 }

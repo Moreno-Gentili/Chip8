@@ -10,18 +10,22 @@ public class Processor : IProcessor
 {
     private const byte A = 10, B = 11, C = 12, D = 13, E = 14, F = 15;
     ProgramCounterHint lastResult = ProgramCounterHint.Advance;
+    Opcode? lastOpcode;
+    
     public ProgramCounterHint ExecuteOpcode(IAddressableMemory addressableMemory, IFrameBuffer frameBuffer, IStack stack, IRegisters registers, ITimers timers, IFont font, IKeyboard keyboard)
     {
         lastResult = lastResult switch
         {
             ProgramCounterHint.WaitForKey when keyboard.PressedKey is null => lastResult,
-            _ => ExecuteOpcode(addressableMemory.Read(registers.ProgramCounter, sizeof(ushort)), addressableMemory, frameBuffer, stack, registers, timers, font, keyboard)
+            _ => ExecuteOpcode(lastOpcode = addressableMemory.Read(registers.ProgramCounter, sizeof(ushort)), addressableMemory, frameBuffer, stack, registers, timers, font, keyboard)
         };
 
         AdvanceProgramCounterIfNeeded(registers.ProgramCounter, lastResult);
 
         return lastResult;
     }
+
+    public Opcode? LastOpcode => lastOpcode;
 
     private static void AdvanceProgramCounterIfNeeded(IProgramCounter programCounter, ProgramCounterHint result)
     {

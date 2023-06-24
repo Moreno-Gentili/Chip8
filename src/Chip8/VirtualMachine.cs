@@ -13,12 +13,12 @@ public class VirtualMachine : IVirtualMachine
     // Components
     private readonly Clock clock;
     private readonly Memory<byte> memory;
+    private readonly Processor processor;
     private readonly Stack stack;
     private readonly IAddressableMemory addressableMemory;
     private readonly IFrameBuffer frameBuffer;
     private readonly IRegisters registers;
     private readonly ITimers timers;
-    private readonly IProcessor processor;
     private readonly IFont font;
 
     // IO
@@ -100,6 +100,11 @@ public class VirtualMachine : IVirtualMachine
         display.Render(frameBuffer, time);
     }
 
+    public void ResetClock()
+    {
+        clock.Reset();
+    }
+
     public Dictionary<string, string?> GetState()
     {
         Dictionary<string, string?> values = new()
@@ -125,11 +130,11 @@ public class VirtualMachine : IVirtualMachine
             { "VC", registers.V[RegisterId.VC].ToString() },
             { "VD", registers.V[RegisterId.VD].ToString() },
             { "VE", registers.V[RegisterId.VE].ToString() },
-            { "VF", registers.V[RegisterId.VF].ToString() }
+            { "VF", registers.V[RegisterId.VF].ToString() },
+            { "OPCODE", processor.LastOpcode?.ToString() ?? string.Empty }
         };
 
         return values;
-
     }
 
     private static void Clear(Memory<byte> memory)

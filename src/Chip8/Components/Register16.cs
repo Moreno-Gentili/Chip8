@@ -20,12 +20,13 @@ public class Register16 : MemoryComponent, IRegisterI, IProgramCounter
 
     public ushort GetValue()
     {
-        return BitConverter.ToUInt16(memory.Span);
+        return Convert.ToUInt16((memory.Span[0] << 8) + memory.Span[1]);
     }
 
     public void SetValue(ushort value)
     {
-        BitConverter.GetBytes(value).CopyTo(memory);
+        memory.Span[0] = Convert.ToByte(value >> 8);
+        memory.Span[1] = Convert.ToByte(value & 0xFF);
     }
 }
 

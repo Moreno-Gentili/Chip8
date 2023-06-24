@@ -7,46 +7,74 @@ public class Keyboard : IKeyboard
     private Key? pressedKey = null;
     public Key? PressedKey => pressedKey;
 
-    public void HandleKeyDown(string key)
+    private Dictionary<char, Key> keyMap = new()
     {
-        Key? pressedKey = GetMappedKey(key);
+        { '1', Key.Key1 },
+        { '2', Key.Key2 },
+        { '3', Key.Key3 },
+        { '4', Key.KeyC },
+        { 'Q', Key.Key4 },
+        { 'W', Key.Key5 },
+        { 'E', Key.Key6 },
+        { 'R', Key.KeyD },
+        { 'A', Key.Key7 },
+        { 'S', Key.Key8 },
+        { 'D', Key.Key9 },
+        { 'F', Key.KeyE },
+        { 'Z', Key.KeyA },
+        { 'X', Key.Key0 },
+        { 'C', Key.KeyB },
+        { 'V', Key.KeyF }
+    };
 
-        if (pressedKey is not null)
+    public IReadOnlyCollection<KeyValuePair<char, Key>> Keys => keyMap;
+
+    public void HandleKeyDown(char key, Dictionary<char, Key>? additionalKeyMap = null)
+    {
+        Key? mappedKey = GetMappedKey(key, additionalKeyMap);
+
+        if (mappedKey is not null)
         {
-            this.pressedKey = pressedKey;
+            HandleKeyDown(mappedKey.Value);
         }
     }
 
-    public void HandleKeyUp(string key)
+    public void HandleKeyDown(Key key)
     {
-        Key? pressedKey = GetMappedKey(key);
-        if (pressedKey is not null && this.pressedKey == pressedKey)
+        pressedKey = key;
+    }
+
+    public void HandleKeyUp(char key, Dictionary<char, Key>? additionalKeyMap = null)
+    {
+        Key? mappedKey = GetMappedKey(key, additionalKeyMap);
+        
+        if (mappedKey is not null)
         {
-            this.pressedKey = null;
+            HandleKeyUp(mappedKey.Value);
         }
     }
 
-    private Key? GetMappedKey(string key)
+    public void HandleKeyUp(Key key)
     {
-        return key switch
+        if (pressedKey == key)
         {
-            "1" => Key.Key1,
-            "2" => Key.Key2,
-            "3" => Key.Key3,
-            "4" => Key.KeyC,
-            "q" => Key.Key4,
-            "w" => Key.Key5,
-            "e" => Key.Key6,
-            "r" => Key.KeyD,
-            "a" => Key.Key7,
-            "s" => Key.Key8,
-            "d" => Key.Key9,
-            "f" => Key.KeyE,
-            "z" => Key.KeyA,
-            "x" => Key.Key0,
-            "c" => Key.KeyB,
-            "v" => Key.KeyF,
-            _ => null
-        };
+            pressedKey = null;
+        }
+    }
+
+    private Key? GetMappedKey(char key, Dictionary<char, Key>? additionalKeyMap)
+    {
+        if (keyMap.ContainsKey(key))
+        {
+            return keyMap[key];
+        }
+        else if (additionalKeyMap?.ContainsKey(key) == true)
+        {
+            return additionalKeyMap[key];
+        }
+        else
+        {
+            return null;
+        }
     }
 }

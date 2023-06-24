@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
     <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
     <meta property="og:title" content="CHIP-8 emulator on Blazor WebAssembly" />
-    <meta property="og:image" content="/preview.gif" />
+    <meta property="og:image" content="/images/preview.gif" />
 </head>
 
 <body>
@@ -25,25 +25,41 @@
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
-    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script>
-        function cycle(timeStamp) {
-            window.requestAnimationFrame(cycle);
+        function update(timeStamp) {
+            window.requestAnimationFrame(update);
             window.emulator.invokeMethodAsync('Update', timeStamp);
+        }
+
+        function normalizeKey(key) {
+            switch (key) {
+                case "ArrowLeft":
+                    return "←";
+                case "ArrowRight":
+                    return "→";
+                case "ArrowUp":
+                    return "↑";
+                case "ArrowDown":
+                    return "↓";
+                case " ":
+                    return "␣";
+                default:
+                    return key.length == 1 ? key.toUpperCase() : null;
+            }
         }
 
         function initEmulator(emulator) {
             window.emulator = emulator;
 
             window.addEventListener('keydown', ({ key }) => {
-                window.emulator.invokeMethodAsync('HandleKeyDown', key.toLowerCase());
+                window.emulator.invokeMethodAsync('HandleKeyDown', normalizeKey(key));
             });
 
             window.addEventListener('keyup', ({ key }) => {
-                window.emulator.invokeMethodAsync('HandleKeyUp', key.toLowerCase());
+                window.emulator.invokeMethodAsync('HandleKeyUp', normalizeKey(key));
             });
 
-            window.requestAnimationFrame(cycle);
+            window.requestAnimationFrame(update);
             renderCrt();
         }
 
@@ -75,11 +91,18 @@
             }
         }
 
-        function showError() {
-            document.getElementById('error').showDialog();
+        function promptFileSelection(element) {
+            element.click();
+        }
+
+        function showError(element) {
+            if (element) {
+                element.showModal();
+            }
         }
     </script>
 
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
 
     <script type="importmap">
@@ -95,6 +118,12 @@
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass';
         import { ShaderPass } from 'three/addons/postprocessing/ShaderPass';
+
+        window.clearCanvas = function () {
+            const canvas = document.querySelector('#lcd canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        };
 
         window.renderCrt = function () {
 

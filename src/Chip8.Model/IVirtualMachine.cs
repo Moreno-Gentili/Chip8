@@ -8,4 +8,5 @@ public interface IVirtualMachine
     int CpuInstructionsPerSecond { get; set; }
     void Update(TimeSpan time);
     Dictionary<string, string?> GetState();
+    void ResetClock();
 }
