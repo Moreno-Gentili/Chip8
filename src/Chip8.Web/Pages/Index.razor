@@ -100,73 +100,7 @@
 
 @if (state is not null && cassette is not null && cassette.Crc32 is not null)
 {
-    <footer id="debug">
-        <details>
-            <summary>Debug</summary>
-
-            <dl>
-                <dt title="ROM checksum (CRC32)">CRC32</dt>
-                <dd>@cassette.Crc32</dd>
-                <dt title="Frames per second">FPS</dt>
-                <dd>@Convert.ToInt32(Math.Round(fps.Average()))</dd>
-                <dt title="Instructions per second">IPS</dt>
-                <dd>@vm?.CpuInstructionsPerSecond</dd>
-                <dt title="Opcode (16 bit)">OPCODE</dt>
-                <dd id="opcode">@state["OPCODE"]</dd>
-                <dt title="Program Counter (16 bit)">PC</dt>
-                <dd>@state["PC"]</dd>
-                <dt title="Register I (16 bit)">I</dt>
-                <dd>@state["I"]</dd>
-                <dt title="Sound Timer (8 bit)">ST</dt>
-                <dd>@state["ST"]</dd>
-                <dt title="Delay Timer (8 bit)">DT</dt>
-                <dd>@state["DT"]</dd>
-                <dt title="Stack Pointer (8 bit)">SP</dt>
-                <dd>@state["SP"]</dd>
-                <dt title="Stack (16 * 16 bit)">STACK</dt>
-                <dd id="stack">@state["STACK"]</dd>
-            </dl>
-
-            <dl>
-                <dt title="Register V0 (8 bit)">V0</dt>
-                <dd>@state["V0"]</dd>
-                <dt title="Register V1 (8 bit)">V1</dt>
-                <dd>@state["V1"]</dd>
-                <dt title="Register V2 (8 bit)">V2</dt>
-                <dd>@state["V2"]</dd>
-                <dt title="Register V3 (8 bit)">V3</dt>
-                <dd>@state["V3"]</dd>
-                <dt title="Register V4 (8 bit)">V4</dt>
-                <dd>@state["V4"]</dd>
-                <dt title="Register V5 (8 bit)">V5</dt>
-                <dd>@state["V5"]</dd>
-                <dt title="Register V6 (8 bit)">V6</dt>
-                <dd>@state["V6"]</dd>
-                <dt title="Register V7 (8 bit)">V7</dt>
-                <dd>@state["V7"]</dd>
-                <dt title="Register V8 (8 bit)">V8</dt>
-                <dd>@state["V8"]</dd>
-                <dt title="Register V9 (8 bit)">V9</dt>
-                <dd>@state["V9"]</dd>
-                <dt title="Register VA (8 bit)">VA</dt>
-                <dd>@state["VA"]</dd>
-                <dt title="Register VB (8 bit)">VB</dt>
-                <dd>@state["VB"]</dd>
-                <dt title="Register VC (8 bit)">VC</dt>
-                <dd>@state["VC"]</dd>
-                <dt title="Register VD (8 bit)">VD</dt>
-                <dd>@state["VD"]</dd>
-                <dt title="Register VE (8 bit)">VE</dt>
-                <dd>@state["VE"]</dd>
-                <dt title="Register VF (8 bit)">VF</dt>
-                <dd>@state["VF"]</dd>
-            </dl>
-            <nav id="debug-toolbar">
-                <button type="button" id="debug-pause" accesskey="P" title="Toggle pause (ALT+P)" class="@GetTogglePauseClassName()" @onclick="TogglePause"><img src="images/pause.png" /></button>
-                <button type="button" id="debug-step" accesskey="O" title="Step over (ALT+O)" class="@GetStepOverClassName()" @onclick="Step" disabled="@(shouldStep is null)"><img src="images/step.png" /></button>
-            </nav>
-        </details>
-    </footer>
+    <Debugger Crc32="@cassette.Crc32" Fps="@Convert.ToInt32(Math.Round(fps.Average()))" State="@state" Vm="@vm" @bind-ShouldStep="shouldStep" />
 }
 
 <dialog @ref="errorDialog" class="nes-dialog is-dark is-rounded">
@@ -202,7 +136,7 @@
 
     Rom[] roms = new Rom[0];
 
-    IVirtualMachine? vm;
+    VirtualMachine? vm;
     Cassette? cassette;
     Speaker? speaker;
     Display? display;
@@ -309,7 +243,7 @@
 
         try
         {
-            vm = VirtualMachine.Create(cassette, keyboard, display, speaker);
+            vm = (VirtualMachine)VirtualMachine.Create(cassette, keyboard, display, speaker);
             await SetBuzzer(false);
             faulted = false;
             await JsRuntime.InvokeVoidAsync("clearCanvas");
@@ -465,7 +399,7 @@
         }
 
         fps.Add(1000 / (timeStamp - lastUpdate));
-        if (fps.Count > 10)
+        if (fps.Count > 60)
         {
             fps.RemoveAt(0);
         }
@@ -531,29 +465,6 @@
         return string.Empty;
     }
 
-    private string GetStepOverClassName()
-    {
-        return $"nes-btn {(shouldStep is null ? "is-disabled" : "")}";
-    }
-
-    private string GetTogglePauseClassName()
-    {
-        return $"nes-btn {(shouldStep is null ? "" : "is-success")}";
-    }
-
-    private void TogglePause()
-    {
-        if (shouldStep is null)
-        {
-            shouldStep = false;
-        }
-        else if (vm is not null)
-        {
-            shouldStep = null;
-            vm.ResetClock();
-        }
-    }
-
     private void ShowHelp()
     {
         if (!helpOpen)
@@ -562,10 +473,6 @@
         }
     }
 
-    private void Step()
-    {
-        shouldStep = true;
-    }
 
     private static string GetRomFullName(Rom rom)
     {

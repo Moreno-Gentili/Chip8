@@ -1,0 +1,123 @@
+﻿@using Chip8.Model;
+@using Chip8.Web.IO;
+<footer id="debug">
+    <details>
+        <summary>Debug</summary>
+
+        <dl>
+            <dt title="ROM checksum (CRC32)">CRC32</dt>
+            <dd>@Crc32</dd>
+            <dt title="Frames per second">FPS</dt>
+            <dd>@Fps</dd>
+            <dt title="Instructions per second">IPS</dt>
+            <dd>@Vm?.CpuInstructionsPerSecond</dd>
+            <dt title="Opcode (16 bit)">OPCODE</dt>
+            <dd id="opcode">@State["OPCODE"]</dd>
+            <dt title="Program Counter (16 bit)">PC</dt>
+            <dd>@State["PC"]</dd>
+            <dt title="Register I (16 bit)">I</dt>
+            <dd>@State["I"]</dd>
+            <dt title="Sound Timer (8 bit)">ST</dt>
+            <dd>@State["ST"]</dd>
+            <dt title="Delay Timer (8 bit)">DT</dt>
+            <dd>@State["DT"]</dd>
+            <dt title="Stack Pointer (8 bit)">SP</dt>
+            <dd>@State["SP"]</dd>
+            <dt title="Stack (16 * 16 bit)">STACK</dt>
+            <dd id="stack">@State["STACK"]</dd>
+        </dl>
+
+        <dl>
+            <dt title="Register V0 (8 bit)">V0</dt>
+            <dd>@State["V0"]</dd>
+            <dt title="Register V1 (8 bit)">V1</dt>
+            <dd>@State["V1"]</dd>
+            <dt title="Register V2 (8 bit)">V2</dt>
+            <dd>@State["V2"]</dd>
+            <dt title="Register V3 (8 bit)">V3</dt>
+            <dd>@State["V3"]</dd>
+            <dt title="Register V4 (8 bit)">V4</dt>
+            <dd>@State["V4"]</dd>
+            <dt title="Register V5 (8 bit)">V5</dt>
+            <dd>@State["V5"]</dd>
+            <dt title="Register V6 (8 bit)">V6</dt>
+            <dd>@State["V6"]</dd>
+            <dt title="Register V7 (8 bit)">V7</dt>
+            <dd>@State["V7"]</dd>
+            <dt title="Register V8 (8 bit)">V8</dt>
+            <dd>@State["V8"]</dd>
+            <dt title="Register V9 (8 bit)">V9</dt>
+            <dd>@State["V9"]</dd>
+            <dt title="Register VA (8 bit)">VA</dt>
+            <dd>@State["VA"]</dd>
+            <dt title="Register VB (8 bit)">VB</dt>
+            <dd>@State["VB"]</dd>
+            <dt title="Register VC (8 bit)">VC</dt>
+            <dd>@State["VC"]</dd>
+            <dt title="Register VD (8 bit)">VD</dt>
+            <dd>@State["VD"]</dd>
+            <dt title="Register VE (8 bit)">VE</dt>
+            <dd>@State["VE"]</dd>
+            <dt title="Register VF (8 bit)">VF</dt>
+            <dd>@State["VF"]</dd>
+        </dl>
+        <nav id="debug-toolbar">
+            <button type="button" id="debug-pause" accesskey="P" title="Toggle pause (ALT+P)" class="@GetTogglePauseClassName()" @onclick="TogglePause"><img src="images/pause.png" /></button>
+            <button type="button" id="debug-step" accesskey="O" title="Step over (ALT+O)" class="@GetStepOverClassName()" @onclick="Step" disabled="@(ShouldStep is null)"><img src="images/step.png" /></button>
+        </nav>
+    </details>
+</footer>
+@code {
+    [Parameter]
+    public string Crc32 { get; set; } = string.Empty;
+
+    [Parameter]
+    public int Fps { get; set; }
+
+    [Parameter]
+    public Dictionary<string, string?> State { get; set; } = new();
+
+    [Parameter]
+    public VirtualMachine? Vm { get; set; }
+
+    [Parameter]
+    public bool? ShouldStep { get; set; }
+
+    [Parameter]
+    public EventCallback<bool?> ShouldStepChanged { get; set; }
+
+    private string GetStepOverClassName()
+    {
+        return $"nes-btn {(ShouldStep is null ? "is-disabled" : "")}";
+    }
+
+    private string GetTogglePauseClassName()
+    {
+        return $"nes-btn {(ShouldStep is null ? "" : "is-success")}";
+    }
+
+
+    private async void TogglePause()
+    {
+        if (ShouldStep is null)
+        {
+            await UpdateShouldStep(false);
+        }
+        else if (Vm is not null)
+        {
+            await UpdateShouldStep(null);
+            Vm.ResetClock();
+        }
+    }
+
+    private async void Step()
+    {
+        await UpdateShouldStep(true);
+    }
+
+    private async Task UpdateShouldStep(bool? value)
+    {
+        ShouldStep = value;
+        await ShouldStepChanged.InvokeAsync(value);        
+    }
+}
