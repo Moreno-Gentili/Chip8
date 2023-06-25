@@ -21,7 +21,7 @@
         <InputFile @ref="fileSelector" OnChange="LoadRomFromDisk" class="btn-primary" accept=".rom,.ch8" hidden />
         <div class="nes-select is-dark">
             <select @ref="romSelector" @onchange="LoadRom">
-                <option value="">Load from cassette...</option>
+                <option value="">Browse...</option>
                 @if (diskRomPath is not null)
                 {
                     <option value="." selected>@diskRomPath</option>
@@ -29,7 +29,7 @@
                 @foreach (var romGroup in roms.GroupBy(r => r.Group))
                 {
                     <optgroup label="@romGroup.Key">
-                        @foreach (var rom in romGroup)
+                        @foreach (var rom in romGroup.OrderBy(r => r.Name))
                         {
                             <option value="@rom.Crc32" selected="@(rom.Crc32 == defaultSelectedRom)">@GetRomFullName(rom)</option>
                         }
@@ -248,6 +248,23 @@
             await LoadRomFromHttp(defaultRom);
         }
     }
+    
+    private async void LoadRom(ChangeEventArgs args)
+    {
+        Rom? rom = roms.SingleOrDefault(r => r.Crc32 == args.Value?.ToString());
+        if (rom is not null)
+        {
+            diskRomPath = null;
+            await LoadRomFromHttp(rom);
+        }
+        else if (cassette is not null)
+        {
+            diskRomPath = "<no cassette>";
+            cassette.Eject();
+            await Reset();
+            await PromptFileSelection();
+        }
+    }
 
     private async Task LoadRomFromHttp(Rom rom)
     {
@@ -290,29 +307,11 @@
             await Reset();
             SetIps(null);
             diskRomPath = name;
-            additionalKeyMap = null;
-            reverseAdditionalKeyMap = null;
+            SetKeyMap(cassette.Crc32);
         }
         catch (Exception exc)
         {
             await ShowError($"Loading error: {exc.Message}");
-        }
-    }
-
-    private async void LoadRom(ChangeEventArgs args)
-    {
-        Rom? rom = roms.SingleOrDefault(r => r.Crc32 == args.Value?.ToString());
-        if (rom is not null)
-        {
-            diskRomPath = null;
-            await LoadRomFromHttp(rom);
-        }
-        else if (cassette is not null)
-        {
-            diskRomPath = "<no cassette>";
-            cassette.Eject();
-            await Reset();
-            await PromptFileSelection();
         }
     }
 
@@ -335,6 +334,20 @@
         else
         {
             vm.CpuInstructionsPerSecond = ips.Value;
+        }
+    }
+
+    private void SetKeyMap(string crc32)
+    {
+        Rom? rom = roms.FirstOrDefault(r => r.Crc32 == crc32);
+        if (rom is not null)
+        {
+            SetKeyMap(rom);
+        }
+        else
+        {
+            additionalKeyMap = null;
+            reverseAdditionalKeyMap = null;
         }
     }
 
@@ -417,13 +430,11 @@
     private static string GetRomFullName(Rom rom)
     {
         StringBuilder name = new();
-        name.Append(rom.Name);
+        name.Append(rom.Name.PadRight(16, ' '));
 
         if (rom.Year is not null)
         {
-            name.Append(" (");
             name.Append(rom.Year.ToString());
-            name.Append(")");
         }
 
         if (rom.Author is not null)

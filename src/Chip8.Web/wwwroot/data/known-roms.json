@@ -14,6 +14,150 @@
         "5": "␣",
         "6": "→"
       }
+    },
+    {
+      "crc32": "0CE70772",
+      "name": "Tetris",
+      "author": "Fran Dachille",
+      "year": 1991,
+      "group": "Games",
+      "ips": null,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Tetris%20%5BFran%20Dachille%2C%201991%5D.ch8",
+      "keyMap": {
+        "4": "␣",
+        "5": "←",
+        "6": "→",
+        "7": "↓"
+      }
+    },
+    {
+      "crc32": "841FDE23",
+      "name": "Pong",
+      "author": null,
+      "year": null,
+      "group": "Games",
+      "ips": null,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Pong%20(1%20player).ch8",
+      "keyMap": {
+        "1": "↑",
+        "4": "↓"
+      }
+    },
+    {
+      "crc32": "A6BCA0F7",
+      "name": "Breakout",
+      "author": "David Winter",
+      "year": 1997,
+      "group": "Games",
+      "ips": null,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Breakout%20(Brix%20hack)%20%5BDavid%20Winter%2C%201997%5D.ch8",
+      "keyMap": {
+        "4": "←",
+        "6": "→"
+      }
+    },
+    {
+      "crc32": "C77A1852",
+      "name": "Tapeworm",
+      "author": "JDR",
+      "year": 1999,
+      "group": "Games",
+      "ips": null,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Tapeworm%20%5BJDR%2C%201999%5D.ch8",
+      "keyMap": {
+        "2": "↑",
+        "4": "←",
+        "6": "→",
+        "8": "↓",
+        "F": "␣"
+      }
+    },
+    {
+      "crc32": "331413E7",
+      "name": "Ufo",
+      "author": "Lutz V",
+      "year": 1992,
+      "group": "Games",
+      "ips": 800,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/UFO%20%5BLutz%20V%2C%201992%5D.ch8",
+      "keyMap": {
+        "4": "←",
+        "5": "↑",
+        "6": "→"
+      }
+    },
+    {
+      "crc32": "9D307E90",
+      "name": "Blinky",
+      "author": "Hans Egerberg",
+      "year": 1991,
+      "group": "Games",
+      "ips": 1400,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Blinky%20%5BHans%20Christian%20Egeberg%2C%201991%5D.ch8",
+      "keyMap": {
+        "3": "↑",
+        "6": "↓",
+        "7": "←",
+        "8": "→"
+      }
+    },
+    {
+      "crc32": "0614BA7F",
+      "name": "Astro dodge",
+      "author": "Revival Studios",
+      "year": 2008,
+      "group": "Games",
+      "ips": null,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Astro%20Dodge%20%5BRevival%20Studios%2C%202008%5D.ch8",
+      "keyMap": {
+        "4": "←",
+        "5": "␣",
+        "6": "→"
+      }
+    },
+    {
+      "crc32": "511CDD7A",
+      "name": "Stars",
+      "author": "Sergey Naydenov",
+      "year": 2010,
+      "group": "Demos",
+      "ips": 1400,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/demos/Stars%20%5BSergey%20Naydenov%2C%202010%5D.ch8",
+      "keyMap": {
+      }
+    },
+    {
+      "crc32": "37A658A2",
+      "name": "Maze",
+      "author": "David Winter",
+      "year": 1999,
+      "group": "Demos",
+      "ips": 1400,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/demos/Maze%20%5BDavid%20Winter%2C%20199x%5D.ch8",
+      "keyMap": {
+      }
+    },
+    {
+      "crc32": "1DD59BE5",
+      "name": "Trip8",
+      "author": "Revival Studios",
+      "year": 2008,
+      "group": "Demos",
+      "ips": 1400,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/demos/Trip8%20Demo%20(2008)%20%5BRevival%20Studios%5D.ch8",
+      "keyMap": {
+      }
+    },
+    {
+      "crc32": "53B431FC",
+      "name": "Particle",
+      "author": "zeroZshadow",
+      "year": 2008,
+      "group": "Demos",
+      "ips": 1400,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/demos/Particle%20Demo%20%5BzeroZshadow%2C%202008%5D.ch8",
+      "keyMap": {
+      }
     }
   ]
 }

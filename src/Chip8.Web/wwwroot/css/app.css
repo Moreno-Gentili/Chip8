@@ -71,7 +71,7 @@ body {
 }
 
 h1 {
-    font-size: 40px;
+    font-size: 57px;
     text-align: center;
     text-transform: uppercase;
 }
@@ -90,8 +90,8 @@ h2 {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top:60px;
-    margin-bottom: 60px;
+    margin-top: 30px;
+    margin-bottom: 30px;
 }
 
 #selector .nes-select {
@@ -269,6 +269,16 @@ html, body, pre, code, kbd, samp {
         font-size: 30px;
     }
 
+    .alt-key[data-key="↓"] {
+        font-size: 16px;
+        top: 15px;
+    }
+
+    .alt-key[data-key="↑"] {
+        font-size: 16px;
+        top: 15px;
+    }
+
 .dialog-menu {
     text-align: center;
     padding: 0;
@@ -281,7 +291,7 @@ html, body, pre, code, kbd, samp {
 
 #credits
 {
-    margin-top: 80px;
+    margin-top: 70px;
     text-align: center;
     font-size: 0.7rem;
     line-height: 25px;
