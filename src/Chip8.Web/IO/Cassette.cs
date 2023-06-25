@@ -16,6 +16,11 @@ public class Cassette : ICassette
 
     public string? Crc32 => hash;
 
+    public void Eject()
+    {
+        memory = null;
+    }
+
     public async Task Change(string romUrl)
     {
         byte[] buffer = await client.GetByteArrayAsync(romUrl);

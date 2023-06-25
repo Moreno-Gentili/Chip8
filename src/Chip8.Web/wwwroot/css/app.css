@@ -3,10 +3,37 @@
     --dark-bg-color: #131518;
 }
 
+a, a:visited {
+    color: lime;
+}
+
+a:active {
+    color: darkolivegreen;
+} 
+
 html, body, #app, #loader {
     height: 100%;
 }
 
+#drop {
+    display: none;
+    pointer-events: none;
+}
+
+body[data-dragging="1"] #drop {
+    display: flex;
+}
+
+#drop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    z-index: 98;
+}
 
 #loader {
     display: flex;
@@ -131,7 +158,7 @@ h2 {
 
 .github-link {
     position: absolute;
-    top: -20px;
+    top: 0;
     right: 40px;
 }
 
@@ -179,7 +206,7 @@ html, body, pre, code, kbd, samp {
 
 #crt {
     background-color: var(--main-bg-color);
-    background-image: url('/images/crt.png');
+    background-image: url('../images/crt.png');
     z-index: 2;
 }
 
@@ -226,22 +253,51 @@ html, body, pre, code, kbd, samp {
 {
     margin-top: 80px;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     line-height: 25px;
 }
 
-#options {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px;
+#audio-option, #display-option, #fullscreen-option {
+    margin: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding-top: 10px;
+}
+
+    #fullscreen-option button {
+        padding: 0;
+        margin: 0;
+        border: 0;
+        background: transparent;
+        position: relative;
+        top: -5px;
+        width: 40px;
+        height: 32px;
+    }
+
+    #options {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+@media screen and (min-width: 1002px) 
+{
+    #options {
+        margin-left: -125px;
+    }
 }
 
 #options img {
     position: relative;
     top: -2px;
     left: 10px;
+}
+
+#fullscreen-option img {
+    top: 0;
+    left: 0;
 }
 
 #options label

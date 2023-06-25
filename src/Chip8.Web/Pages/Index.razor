@@ -20,10 +20,10 @@
 
 <main>
     <header id="selector">
-        <InputFile @ref="fileSelector" OnChange="LoadRomFromDisk" class="btn-primary" hidden />
+        <InputFile @ref="fileSelector" OnChange="LoadRomFromDisk" class="btn-primary" accept=".rom,.ch8" hidden />
         <div class="nes-select is-dark">
-            <select @onchange="LoadRom">
-                <option value="-">Load from disk...</option>
+            <select @ref="romSelector" @onchange="LoadRom">
+                <option value="">Load from local cassette...</option>
                 @if (diskRomPath is not null)
                 {
                     <option value="." selected>@diskRomPath</option>
@@ -41,7 +41,7 @@
         </div>
         <button type="button" class="nes-btn is-error" @onclick="Reset">Reset</button>
     </header>
-    <section id="emulator">
+    <section @ref="emulator" id="emulator">
         <article id="display">
             <div id="lcd">
                 <BlazorCanvas @ref="canvas">
@@ -64,26 +64,35 @@
 
     <nav id="options">
         <span id="display-option">
-        <img src="/images/display.png" alt="Display" />
+        <img src="images/display.png" alt="Display" />
         <label>
-            <input type="radio" class="nes-radio is-dark" name="answer-dark" checked value="@nameof(DisplayType.Crt)" @onchange="SetDisplay" />
+            <input type="radio" name="display-selection" class="nes-radio is-dark" checked value="@nameof(DisplayType.Crt)" @onchange="SetDisplay" />
             <span>@nameof(DisplayType.Crt)</span>
+        </label>
+
+        <label>
+                <input type="radio" name="display-selection" class="nes-radio is-dark" value="@nameof(DisplayType.Lcd)" @onchange="SetDisplay" />
+            <span>@nameof(DisplayType.Lcd)</span>
         </label>
         </span>
 
-        
-        <label>
-            <input type="radio" class="nes-radio is-dark" name="answer-dark" value="@nameof(DisplayType.Lcd)" @onchange="SetDisplay" />
-            <span>@nameof(DisplayType.Lcd)</span>
-        </label>
-
         <span id="audio-option">
-        <img src="/images/audio.png" alt="Audio" />
-        <button @onclick="ToggleAudio">@audioText</button>
+            <img src="images/audio.png" alt="Audio" />
+            <label>
+                <input type="radio" name="audio-selection" class="nes-radio is-dark" checked value="0" @onchange="SetAudio" />
+                <span>Off</span>
+            </label>
+
+            <label>
+                <input type="radio" name="audio-selection" class="nes-radio is-dark" value="1" @onchange="SetAudio" />
+                <span>On</span>
+            </label>
         </span>
 
         <span id="fullscreen-option">
-        <img src="/images/fullscreen.png" alt="Audio" />
+            <button type="button" title="Play in fullscreen" @onclick="SetFullscreen">
+                <img src="images/fullscreen.png" alt="Fullscreen" />
+            </button>
         </span>
     </nav>
 </main>
@@ -152,8 +161,8 @@
                 <dd>@state["VF"]</dd>
             </dl>
             <nav id="debug-toolbar">
-                <button type="button" id="debug-pause" accesskey="P" title="Toggle pause (ALT+P)" class="@GetTogglePauseClassName()" @onclick="TogglePause"><img src="/images/pause.png" /></button>
-                <button type="button" id="debug-step" accesskey="O" title="Step over (ALT+O)" class="@GetStepOverClassName()" @onclick="Step" disabled="@(shouldStep is null)"><img src="/images/step.png" /></button>
+                <button type="button" id="debug-pause" accesskey="P" title="Toggle pause (ALT+P)" class="@GetTogglePauseClassName()" @onclick="TogglePause"><img src="images/pause.png" /></button>
+                <button type="button" id="debug-step" accesskey="O" title="Step over (ALT+O)" class="@GetStepOverClassName()" @onclick="Step" disabled="@(shouldStep is null)"><img src="images/step.png" /></button>
             </nav>
         </details>
     </footer>
@@ -169,12 +178,18 @@
     </form>
 </dialog>
 
+<div id="drop" class="nes-container is-rounded is-dark">
+    <p>Drop your ROM file here</p>
+</div>
+
 @code {
     const int canvasWidth = 640;
     const int canvasHeight = 320;
     BlazorCanvas? canvas;
     InputFile? fileSelector;
+    ElementReference? romSelector;
     ElementReference? errorDialog;
+    ElementReference? emulator;
     Dictionary<char, Key>? additionalKeyMap;
     Dictionary<Key, char>? reverseAdditionalKeyMap;
     bool? shouldStep = null;
@@ -191,20 +206,11 @@
     Display? display;
     Keyboard? keyboard;
     DisplayType displayType = DisplayType.Crt;
-    bool hasAudio = false;
-    string audioText = "Unmute";
     TimeSpan lastTimestamp = TimeSpan.Zero;
     bool faulted = false;
     string errorText = string.Empty;
 
     Dictionary<string, string?>? state = null;
-
-    private async void ToggleAudio()
-    {
-        hasAudio = !hasAudio;
-        audioText = hasAudio ? "Mute" : "Unmute";
-        await JsRuntime.InvokeVoidAsync("toggleAudio", hasAudio);
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -267,31 +273,11 @@
         }
     }
 
-    private static TimeSpan? GetTime(float timeStamp, bool? shouldStep, TimeSpan lastTimestamp, int cpuInstructionsPerSecond)
+    [JSInvokable]
+    public async void HandleFile(string name, byte[] content)
     {
-        return shouldStep switch
-        {
-            null => TimeSpan.FromMilliseconds(timeStamp),
-            true => lastTimestamp + TimeSpan.FromSeconds(1) / cpuInstructionsPerSecond,
-            false => (TimeSpan?)null,
-        };
-    }
-
-    private void UpdateFps(float timeStamp)
-    {
-        if (lastUpdate == 0)
-        {
-            lastUpdate = timeStamp;
-            return;
-        }
-
-        fps.Add(1000 / (timeStamp - lastUpdate));
-        if (fps.Count > 10)
-        {
-            fps.RemoveAt(0);
-        }
-
-        lastUpdate = timeStamp;
+        using MemoryStream ms = new MemoryStream(content);
+        await LoadRomFromDisk(name, ms);
     }
 
     [JSInvokable]
@@ -385,6 +371,12 @@
 
     private async void LoadRomFromDisk(InputFileChangeEventArgs e)
     {
+        Stream stream = e.File.OpenReadStream();
+        await LoadRomFromDisk(e.File.Name, stream);
+    }
+
+    private async Task LoadRomFromDisk(string name, Stream stream)
+    {
         if (cassette is null)
         {
             await ShowError("Cassette is not ready");
@@ -393,10 +385,10 @@
 
         try
         {
-            await cassette.Change(e.File.OpenReadStream());
+            await cassette.Change(stream);
             await Reset();
             SetIps(null);
-            diskRomPath = e.File.Name;
+            diskRomPath = name;
             additionalKeyMap = null;
             reverseAdditionalKeyMap = null;
         }
@@ -408,14 +400,17 @@
 
     private async void LoadRom(ChangeEventArgs args)
     {
-        diskRomPath = null;
         Rom? rom = roms.SingleOrDefault(r => r.Crc32 == args.Value?.ToString());
         if (rom is not null)
         {
+            diskRomPath = null;
             await LoadRomFromHttp(rom);
         }
-        else
+        else if (cassette is not null)
         {
+            diskRomPath = "<no cassette>";
+            cassette.Eject();
+            await Reset();
             await PromptFileSelection();
         }
     }
@@ -449,6 +444,34 @@
     }
 
 
+    private static TimeSpan? GetTime(float timeStamp, bool? shouldStep, TimeSpan lastTimestamp, int cpuInstructionsPerSecond)
+    {
+        return shouldStep switch
+        {
+            null => TimeSpan.FromMilliseconds(timeStamp),
+            true => lastTimestamp + TimeSpan.FromSeconds(1) / cpuInstructionsPerSecond,
+            false => (TimeSpan?)null,
+        };
+    }
+
+    private void UpdateFps(float timeStamp)
+    {
+        if (lastUpdate == 0)
+        {
+            lastUpdate = timeStamp;
+            return;
+        }
+
+        fps.Add(1000 / (timeStamp - lastUpdate));
+        if (fps.Count > 10)
+        {
+            fps.RemoveAt(0);
+        }
+
+        lastUpdate = timeStamp;
+    }
+
+
     private void SetDisplay(ChangeEventArgs args)
     {
         if (display is null)
@@ -458,6 +481,19 @@
 
         displayType = Enum.Parse<DisplayType>(args.Value?.ToString() ?? string.Empty);
         display.Connect(displayType);
+    }
+
+    private async void SetAudio(ChangeEventArgs args)
+    {
+        string audioFunctionName = args.Value?.Equals("0") == true ?
+                                        "disableAudio" : "enableAudio";
+
+        await JsRuntime.InvokeVoidAsync(audioFunctionName);
+    }
+
+    private async void SetFullscreen()
+    {
+        await JsRuntime.InvokeVoidAsync("setFullscreen", emulator);
     }
 
     private async Task SetBuzzer(bool on)

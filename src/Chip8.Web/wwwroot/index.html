@@ -117,17 +117,17 @@
         let audioContext;
         let audioOscillator;
 
-        function toggleAudio(enabled) {
-            if (enabled) {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                audioOscillator = audioContext.createOscillator();
-                audioOscillator.type = 'sawtooth';
-                audioOscillator.frequency.value = 700;
-                audioOscillator.start();
-            } else {
-                audioContext = null;
-                audioOscillator = null;
-            }
+        function enableAudio() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioOscillator = audioContext.createOscillator();
+            audioOscillator.type = 'sawtooth';
+            audioOscillator.frequency.value = 700;
+            audioOscillator.start();
+        }
+
+        function disableAudio() {
+            audioContext = null;
+            audioOscillator = null;
         }
 
         function playAudio() {
@@ -154,6 +154,44 @@
                 element.focus();
             }
         }
+
+        function setFullscreen(element) {
+            if (element) {
+                element.requestFullscreen();
+            }
+        }
+
+        document.body.addEventListener('dragover', function (evt) {
+            evt.preventDefault();
+            this.dataset.dragging = '1';
+        }, true);
+
+        document.body.addEventListener('dragend', function (evt) {
+            evt.preventDefault();
+            this.dataset.dragging = null;
+        }, true);
+
+        document.body.addEventListener('dragleave', function (evt) {
+            evt.preventDefault();
+            this.dataset.dragging = null;
+        }, true);
+
+        document.body.addEventListener('drop', function (evt) {
+            evt.preventDefault();
+            this.dataset.dragging = null;
+            if (evt.dataTransfer.files && evt.dataTransfer.files.length > 0) {
+
+                const file = evt.dataTransfer.files[0];
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const arrayBuffer = new Uint8Array(reader.result);
+                    window.emulator.invokeMethodAsync('HandleFile', file.name, arrayBuffer);
+                }
+
+                reader.readAsArrayBuffer(file);
+            }
+            
+        }, true);
 
         function showError(element) {
             if (element) {
