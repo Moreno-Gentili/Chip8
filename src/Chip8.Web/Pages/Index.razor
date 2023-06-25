@@ -65,7 +65,7 @@
 
 @if (state is not null && cassette is not null && cassette.Crc32 is not null)
 {
-    <Debugger Crc32="@cassette.Crc32" Fps="@Convert.ToInt32(Math.Round(fps.Average()))" State="@state" Vm="@vm" @bind-ShouldStep="shouldStep" />
+    <Debugger Crc32="@cassette.Crc32" Fps="@CalculateFps()" State="@state" Vm="@vm" @bind-ShouldStep="shouldStep" />
 }
 
 <dialog @ref="errorDialog" class="nes-dialog is-dark is-rounded">
@@ -211,7 +211,13 @@
             vm = (VirtualMachine)VirtualMachine.Create(cassette, keyboard, display, speaker);
             await SetBuzzer(false);
             faulted = false;
-            await JsRuntime.InvokeVoidAsync("clearCanvas");
+            try
+            {
+                await JsRuntime.InvokeVoidAsync("clearCanvas");
+            }
+            catch
+            {
+            }
         }
         catch
         {
@@ -248,7 +254,7 @@
             await LoadRomFromHttp(defaultRom);
         }
     }
-    
+
     private async void LoadRom(ChangeEventArgs args)
     {
         Rom? rom = roms.SingleOrDefault(r => r.Crc32 == args.Value?.ToString());
@@ -337,7 +343,7 @@
         }
     }
 
-    private void SetKeyMap(string crc32)
+    private void SetKeyMap(string? crc32)
     {
         Rom? rom = roms.FirstOrDefault(r => r.Crc32 == crc32);
         if (rom is not null)
@@ -383,6 +389,16 @@
         }
 
         lastUpdate = timeStamp;
+    }
+
+    private int CalculateFps()
+    {
+        if (fps.Count == 0)
+        {
+            return 0;
+        }
+
+        return Convert.ToInt32(Math.Round(fps.Average()));
     }
 
     private async Task SetBuzzer(bool on)

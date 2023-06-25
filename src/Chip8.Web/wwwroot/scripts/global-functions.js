@@ -60,7 +60,13 @@ function initEmulator(emulator) {
     }, true);
 
     window.requestAnimationFrame(update);
-    renderCrt();
+    let renderInterval;
+    renderInterval = setInterval(function () {
+        if (renderCrt) {
+            clearInterval(renderInterval);
+            renderCrt();
+        }
+    }, 200);
 }
 
 let audioContext;
