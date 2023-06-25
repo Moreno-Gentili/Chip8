@@ -6,6 +6,7 @@
 @using Chip8.Web.IO
 @using System.Threading.Tasks.Dataflow
 @using Chip8.Web.Model;
+@using System.Text;
 @inject IJSRuntime JsRuntime
 @inject HttpClient http
 
@@ -17,25 +18,30 @@
     <a href="https://github.com/Moreno-Gentili/Chip8" target="_blank" rel="noopener" class="github-link" style="text-decoration: none;"><p class="nes-balloon is-dark from-right">Fork me<br>on GitHub</p> <i class="nes-octocat"></i></a>
 </header>
 
-<section>
-    <header>
-        <InputFile @ref="fileSelector" OnChange="LoadRomFromFile" class="btn-primary" />
-        <select @onchange="LoadRom">
-            <option value="-">Load from disk...</option>
-            @foreach (var romGroup in roms.GroupBy(r => r.Group))
-            {
-                <optgroup label="@romGroup.Key">
-                    @foreach (var rom in romGroup)
-                    {
-                        <option value="@rom.Crc32">rom.Name</option>
-                    }
-                </optgroup>
-            }
-        </select>
+<main>
+    <header id="selector">
+        <InputFile @ref="fileSelector" OnChange="LoadRomFromDisk" class="btn-primary" hidden />
+        <div class="nes-select is-dark">
+            <select @onchange="LoadRom">
+                <option value="-">Load from disk...</option>
+                @if (diskRomPath is not null)
+                {
+                    <option value="." selected>@diskRomPath</option>
+                }
+                @foreach (var romGroup in roms.GroupBy(r => r.Group))
+                {
+                    <optgroup label="@romGroup.Key">
+                        @foreach (var rom in romGroup)
+                        {
+                            <option value="@rom.Crc32" selected="@(rom.Crc32 == defaultSelectedRom)">@GetRomFullName(rom)</option>
+                        }
+                    </optgroup>
+                }
+            </select>
+        </div>
         <button type="button" class="nes-btn is-error" @onclick="Reset">Reset</button>
-        <p>More ROMs available at https://github.com/kripod/chip8-roms</p>
     </header>
-    <main id="emulator">
+    <section id="emulator">
         <article id="display">
             <div id="lcd">
                 <BlazorCanvas @ref="canvas">
@@ -50,30 +56,37 @@
             <aside id="keyboard">
                 @foreach (var entry in keyboard.Keys)
                 {
-                    <button type="button" class="@GetKeyboardButtonClassName(entry.Value)" @onmousedown="() => keyboard.HandleKeyDown(entry.Value)" @onmouseup="() => keyboard.HandleKeyUp(entry.Value)">@entry.Key<span class="alt-key">@GetKeyboardAltKey(entry.Value)</span></button>
+                    <button type="button" data-key="@entry.Key" class="@GetKeyboardButtonClassName(entry.Value)" @onmousedown="() => keyboard.HandleKeyDown(entry.Value)" @onmouseup="() => keyboard.HandleKeyUp(entry.Value)">@entry.Key<span class="alt-key" data-key="@GetKeyboardAltKey(entry.Value)">@GetKeyboardAltKey(entry.Value)</span></button>
                 }
             </aside>
         }
-    </main>
+    </section>
 
-    <nav>
+    <nav id="options">
+        <span id="display-option">
         <img src="/images/display.png" alt="Display" />
         <label>
             <input type="radio" class="nes-radio is-dark" name="answer-dark" checked value="@nameof(DisplayType.Crt)" @onchange="SetDisplay" />
             <span>@nameof(DisplayType.Crt)</span>
         </label>
+        </span>
 
+        
         <label>
             <input type="radio" class="nes-radio is-dark" name="answer-dark" value="@nameof(DisplayType.Lcd)" @onchange="SetDisplay" />
             <span>@nameof(DisplayType.Lcd)</span>
         </label>
 
+        <span id="audio-option">
         <img src="/images/audio.png" alt="Audio" />
         <button @onclick="ToggleAudio">@audioText</button>
+        </span>
 
+        <span id="fullscreen-option">
         <img src="/images/fullscreen.png" alt="Audio" />
+        </span>
     </nav>
-</section>
+</main>
 
 @if (state is not null && cassette is not null && cassette.Crc32 is not null)
 {
@@ -82,9 +95,13 @@
             <summary>Debug</summary>
 
             <dl>
-                <dt title="CHECKSUM (32 bit)">CRC32</dt>
+                <dt title="ROM checksum (CRC32)">CRC32</dt>
                 <dd>@cassette.Crc32</dd>
-                <dt title="OPCODE (16 bit)">OPCODE</dt>
+                <dt title="Frames per second">FPS</dt>
+                <dd>@Convert.ToInt32(Math.Round(fps.Average()))</dd>
+                <dt title="Instructions per second">IPS</dt>
+                <dd>@vm?.CpuInstructionsPerSecond</dd>
+                <dt title="Opcode (16 bit)">OPCODE</dt>
                 <dd id="opcode">@state["OPCODE"]</dd>
                 <dt title="Program Counter (16 bit)">PC</dt>
                 <dd>@state["PC"]</dd>
@@ -153,37 +170,41 @@
 </dialog>
 
 @code {
-        const int canvasWidth = 640;
-        const int canvasHeight = 320;
-        BlazorCanvas? canvas;
-        InputFile? fileSelector;
-        ElementReference? errorDialog;
-        Dictionary<char, Key>? additionalKeyMap;
-        Dictionary<Key, char>? reverseAdditionalKeyMap;
-        bool? shouldStep = null;
+    const int canvasWidth = 640;
+    const int canvasHeight = 320;
+    BlazorCanvas? canvas;
+    InputFile? fileSelector;
+    ElementReference? errorDialog;
+    Dictionary<char, Key>? additionalKeyMap;
+    Dictionary<Key, char>? reverseAdditionalKeyMap;
+    bool? shouldStep = null;
+    string? diskRomPath = null;
+    List<float> fps = new();
+    float lastUpdate = 0;
+    string? defaultSelectedRom;
 
-        Rom[] roms = new Rom[0];
+    Rom[] roms = new Rom[0];
 
-        IVirtualMachine? vm;
-        Cassette? cassette;
-        Speaker? speaker;
-        Display? display;
-        Keyboard? keyboard;
-        DisplayType displayType = DisplayType.Crt;
-        bool hasAudio = false;
-        string audioText = "Unmute";
-        TimeSpan lastTimestamp = TimeSpan.Zero;
-        bool faulted = false;
-        string errorText = string.Empty;
+    IVirtualMachine? vm;
+    Cassette? cassette;
+    Speaker? speaker;
+    Display? display;
+    Keyboard? keyboard;
+    DisplayType displayType = DisplayType.Crt;
+    bool hasAudio = false;
+    string audioText = "Unmute";
+    TimeSpan lastTimestamp = TimeSpan.Zero;
+    bool faulted = false;
+    string errorText = string.Empty;
 
-        Dictionary<string, string?>? state = null;
+    Dictionary<string, string?>? state = null;
 
-        private async void ToggleAudio()
-        {
-            hasAudio = !hasAudio;
-            audioText = hasAudio ? "Mute" : "Unmute";
-            await JsRuntime.InvokeVoidAsync("toggleAudio", hasAudio);
-        }
+    private async void ToggleAudio()
+    {
+        hasAudio = !hasAudio;
+        audioText = hasAudio ? "Mute" : "Unmute";
+        await JsRuntime.InvokeVoidAsync("toggleAudio", hasAudio);
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -206,6 +227,8 @@
 
         await JsRuntime.InvokeAsync<object>("initEmulator", DotNetObjectReference.Create(this));
         await Reset();
+        await LoadDefaultRom();
+        await FocusPage();
     }
 
     [JSInvokable]
@@ -215,6 +238,8 @@
         {
             return;
         }
+
+        UpdateFps(timeStamp);
 
         try
         {
@@ -252,26 +277,38 @@
         };
     }
 
-    [JSInvokable]
-    public void HandleKeyDown(string? key)
+    private void UpdateFps(float timeStamp)
     {
-        if (keyboard is null || key is null)
+        if (lastUpdate == 0)
         {
+            lastUpdate = timeStamp;
             return;
         }
 
-        keyboard.HandleKeyDown(key[0], additionalKeyMap);
+        fps.Add(1000 / (timeStamp - lastUpdate));
+        if (fps.Count > 10)
+        {
+            fps.RemoveAt(0);
+        }
+
+        lastUpdate = timeStamp;
     }
 
     [JSInvokable]
-    public void HandleKeyUp(string? key)
+    public void HandleKeyDown(string key)
     {
-        if (keyboard is null || key is null)
-        {
-            return;
-        }
+        keyboard?.HandleKeyDown(key[0], additionalKeyMap);
+    }
 
-        keyboard.HandleKeyUp(key[0], additionalKeyMap);
+    [JSInvokable]
+    public void HandleKeyUp(string key)
+    {
+        keyboard?.HandleKeyUp(key[0], additionalKeyMap);
+    }
+
+    private async Task FocusPage()
+    {
+        await JsRuntime.InvokeVoidAsync("focusMainButton");
     }
 
     private async Task Reset()
@@ -286,8 +323,6 @@
         {
             vm = VirtualMachine.Create(cassette, keyboard, display, speaker);
             await SetBuzzer(false);
-            additionalKeyMap = GameKeyMaps.FindGameMapByHash(cassette.Crc32);
-            reverseAdditionalKeyMap = additionalKeyMap?.ToDictionary(entry => entry.Value, entry => entry.Key);
             faulted = false;
             await JsRuntime.InvokeVoidAsync("clearCanvas");
         }
@@ -302,7 +337,9 @@
     {
         try
         {
-            return await http.GetFromJsonAsync<Rom[]>("/data/known-roms.json") ?? throw new InvalidOperationException("Invalid rom data");
+            KnownRoms knownRoms = await http.GetFromJsonAsync<KnownRoms>("data/known-roms.json") ?? throw new InvalidOperationException("Invalid rom data");
+            defaultSelectedRom = knownRoms.Selected;
+            return knownRoms.Roms;
         }
         catch (Exception exc)
         {
@@ -311,7 +348,42 @@
         }
     }
 
-    private async void LoadRomFromFile(InputFileChangeEventArgs e)
+    private async Task LoadDefaultRom()
+    {
+        if (defaultSelectedRom is null)
+        {
+            return;
+        }
+
+        Rom? defaultRom = roms.FirstOrDefault(r => r.Crc32 == defaultSelectedRom);
+        if (defaultRom is not null)
+        {
+            await LoadRomFromHttp(defaultRom);
+        }
+    }
+
+    private async Task LoadRomFromHttp(Rom rom)
+    {
+        if (cassette is null)
+        {
+            await ShowError("Cassette is not ready");
+            return;
+        }
+
+        try
+        {
+            await cassette.Change(rom.Url);
+            await Reset();
+            SetIps(rom.Ips);
+            SetKeyMap(rom);
+        }
+        catch (Exception exc)
+        {
+            await ShowError($"Loading error: {exc.Message}");
+        }
+    }
+
+    private async void LoadRomFromDisk(InputFileChangeEventArgs e)
     {
         if (cassette is null)
         {
@@ -323,6 +395,10 @@
         {
             await cassette.Change(e.File.OpenReadStream());
             await Reset();
+            SetIps(null);
+            diskRomPath = e.File.Name;
+            additionalKeyMap = null;
+            reverseAdditionalKeyMap = null;
         }
         catch (Exception exc)
         {
@@ -332,40 +408,44 @@
 
     private async void LoadRom(ChangeEventArgs args)
     {
+        diskRomPath = null;
         Rom? rom = roms.SingleOrDefault(r => r.Crc32 == args.Value?.ToString());
         if (rom is not null)
         {
-            await LoadRomFromHttp(rom.Url);
+            await LoadRomFromHttp(rom);
         }
         else
         {
-            // TODO: Load from disk
             await PromptFileSelection();
         }
     }
 
     private async Task PromptFileSelection()
     {
-        await JsRuntime.InvokeVoidAsync("promptFileSelection", fileSelector);
+        await JsRuntime.InvokeVoidAsync("promptFileSelection", fileSelector?.Element);
     }
 
-    private async Task LoadRomFromHttp(string url)
+    private void SetIps(int? ips)
     {
-        if (cassette is null)
+        if (vm is null)
         {
-            await ShowError("Cassette is not ready");
             return;
         }
 
-        try
+        if (ips is null)
         {
-            await cassette.Change(url);
-            await Reset();
+            vm.ResetCpuInstructionsPerSecond();
         }
-        catch (Exception exc)
+        else
         {
-            await ShowError($"Loading error: {exc.Message}");
+            vm.CpuInstructionsPerSecond = ips.Value;
         }
+    }
+
+    private void SetKeyMap(Rom rom)
+    {
+        additionalKeyMap = rom.GetKeyMap();
+        reverseAdditionalKeyMap = additionalKeyMap?.ToDictionary(entry => entry.Value, entry => entry.Key);
     }
 
 
@@ -439,5 +519,26 @@
     private void Step()
     {
         shouldStep = true;
+    }
+
+    private static string GetRomFullName(Rom rom)
+    {
+        StringBuilder name = new();
+        name.Append(rom.Name);
+
+        if (rom.Year is not null)
+        {
+            name.Append(" (");
+            name.Append(rom.Year.ToString());
+            name.Append(")");
+        }
+
+        if (rom.Author is not null)
+        {
+            name.Append(" by ");
+            name.Append(rom.Author);
+        }
+
+        return name.ToString();
     }
 }

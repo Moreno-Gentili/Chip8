@@ -48,24 +48,6 @@ public class VirtualMachine : IVirtualMachine
         Reset();
     }
 
-    private void Reset()
-    {
-        Clear(memory);
-
-        SetProgramCounter(registers, addressableMemory, addressableMemory.FontRange);
-        LoadFont(font, registers, addressableMemory);
-
-        SetProgramCounter(registers, addressableMemory, addressableMemory.ProgramRange);
-        try
-        {
-            LoadProgram(cassette, registers, addressableMemory);
-        }
-        catch
-        {
-            LoadNoopProgram(registers, addressableMemory);
-        }
-    }
-
     public static IVirtualMachine Create(ICassette cassette, IKeyboard keyboard, IDisplay display, ISpeaker speaker)
     {
         return new VirtualMachine(cassette, keyboard, display, speaker);
@@ -105,6 +87,11 @@ public class VirtualMachine : IVirtualMachine
         clock.Reset();
     }
 
+    public void ResetCpuInstructionsPerSecond()
+    {
+        clock.CpuInstructionsPerSecond = Clock.DefaultCpuInstructionsPerSecond;
+    }
+
     public Dictionary<string, string?> GetState()
     {
         Dictionary<string, string?> values = new()
@@ -136,6 +123,25 @@ public class VirtualMachine : IVirtualMachine
 
         return values;
     }
+
+    private void Reset()
+    {
+        Clear(memory);
+
+        SetProgramCounter(registers, addressableMemory, addressableMemory.FontRange);
+        LoadFont(font, registers, addressableMemory);
+
+        SetProgramCounter(registers, addressableMemory, addressableMemory.ProgramRange);
+        try
+        {
+            LoadProgram(cassette, registers, addressableMemory);
+        }
+        catch
+        {
+            LoadNoopProgram(registers, addressableMemory);
+        }
+    }
+
 
     private static void Clear(Memory<byte> memory)
     {

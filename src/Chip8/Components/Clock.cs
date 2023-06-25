@@ -4,8 +4,9 @@ namespace Chip8.Components;
 
 internal class Clock : IClock
 {
+    public const int DefaultCpuInstructionsPerSecond = 600;
     private int ticksPerSecond = 60;
-    private int cpuInstructionsPerSecond = 600;
+    private int cpuInstructionsPerSecond = DefaultCpuInstructionsPerSecond;
     private TimeSpan tickLastUpdate = TimeSpan.Zero;
     private TimeSpan cpuLastUpdate = TimeSpan.Zero;
 

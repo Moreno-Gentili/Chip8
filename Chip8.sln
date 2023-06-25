@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{23A307B4-3F7
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{937A4424-4D57-4268-A320-F327A0814BD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chip8.Web", "src\Chip8.Web\Chip8.Web.csproj", "{1A6AAF4A-4A70-4A2F-B621-3667D00F8331}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chip8.Web", "src\Chip8.Web\Chip8.Web.csproj", "{1A6AAF4A-4A70-4A2F-B621-3667D00F8331}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

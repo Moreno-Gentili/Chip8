@@ -1,6 +1,40 @@
-:root {
+﻿:root {
     --main-bg-color: #212529;
     --dark-bg-color: #131518;
+}
+
+html, body, #app, #loader {
+    height: 100%;
+}
+
+
+#loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 90vh;
+    width: 90vw;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+    background-color: var(--dark-bg-color);
+    margin: auto;
+    text-align: center;
+}
+
+    #loader progress {
+        max-width: 600px;
+    }
+
+#loader-bars {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }
 
 body {
@@ -25,10 +59,25 @@ h2 {
     background-color: rgba(0, 0, 0, 0.2);
 }
 
+#selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top:60px;
+    margin-bottom: 60px;
+}
+
+#selector .nes-select {
+    width: 740px !important;
+}
+
+#selector .nes-btn {
+    margin-left: 40px;
+}
+
 #keyboard {
-    width: 280px;
     display: grid;
-    padding: 20px;
+    margin:20px;
     box-sizing: border-box;
     grid-template-columns: repeat(4, 50px);
 }
@@ -158,6 +207,11 @@ html, body, pre, code, kbd, samp {
     font-family: monospace;
 }
 
+    .alt-key[data-key="␣"] {
+        top: 2px;
+        font-size: 30px;
+    }
+
 .dialog-menu {
     text-align: center;
     padding: 0;
@@ -168,6 +222,33 @@ html, body, pre, code, kbd, samp {
     color: #555;
 }
 
+#credits
+{
+    margin-top: 80px;
+    text-align: center;
+    font-size: 0.8rem;
+    line-height: 25px;
+}
+
+#options {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+#options img {
+    position: relative;
+    top: -2px;
+    left: 10px;
+}
+
+#options label
+{
+    position: relative;
+    left: -10px;
+}
 
 #blazor-error-ui {
     background: var(--dark-bg-color);

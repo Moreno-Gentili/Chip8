@@ -16,8 +16,31 @@
 
 <body>
     <div id="app">
-        <span class="nes-text">Loading...</span>
-        <progress id="progressbar" class="nes-progress is-pattern is-dark" value="0" max="100"></progress>
+        <svg id="loader-bars" viewBox="-0.5 -0.5 1 1" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 100%;">
+            <line id="line" x1="0" y1="-10" x2="0" y2="10" stroke="rgba(255, 255, 255, 0.3)" stroke-width="100" />
+        </svg>
+        <script>
+            let lineInterval;
+            lineInterval = setInterval(function () {
+                let lineInterval;
+                const line = document.getElementById('line');
+                if (!line) {
+                    clearInterval(lineInterval);
+                    return;
+                }
+
+                let dashes = [];
+                for (i = 0; i < 100; i++) {
+                    dashes.push((Math.random() * 0.04) + 0.01);
+                }
+
+                line.style.strokeDasharray = dashes.join(' ');
+            }, 40);
+        </script>
+        <div id="loader">
+            <div class="nes-text">PLEASE WAIT</div>
+            <progress id="progressbar" class="nes-progress is-pattern is-dark" value="0" max="100" hidden></progress>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
@@ -32,32 +55,60 @@
         }
 
         function normalizeKey(key) {
+            key = key.toUpperCase();
             switch (key) {
-                case "ArrowLeft":
+                case "ARROWLEFT":
                     return "←";
-                case "ArrowRight":
+                case "ARROWRIGHT":
                     return "→";
-                case "ArrowUp":
+                case "ARROWUP":
                     return "↑";
-                case "ArrowDown":
+                case "ARROWDOWN":
                     return "↓";
                 case " ":
                     return "␣";
+                case "1":
+                case "2":
+                case "3":
+                case "4":
+                case "Q":
+                case "W":
+                case "E":
+                case "R":
+                case "A":
+                case "S":
+                case "D":
+                case "F":
+                case "Z":
+                case "X":
+                case "C":
+                case "V":
+                    return key;
                 default:
-                    return key.length == 1 ? key.toUpperCase() : null;
+                    return null;
             }
         }
 
         function initEmulator(emulator) {
             window.emulator = emulator;
 
-            window.addEventListener('keydown', ({ key }) => {
-                window.emulator.invokeMethodAsync('HandleKeyDown', normalizeKey(key));
-            });
+            window.addEventListener('keydown', evt => {
+                const key = normalizeKey(evt.key);
+                if (key !== null) {
+                    evt.stopImmediatePropagation();
+                    evt.preventDefault();
+                    window.emulator.invokeMethodAsync('HandleKeyDown', key);
+                }
+            }, true);
 
-            window.addEventListener('keyup', ({ key }) => {
-                window.emulator.invokeMethodAsync('HandleKeyUp', normalizeKey(key));
-            });
+            window.addEventListener('keyup', evt => {
+                const key = normalizeKey(evt.key);
+                if (key !== null) {
+                    evt.stopImmediatePropagation();
+                    evt.preventDefault();
+                    window.emulator.invokeMethodAsync('HandleKeyUp', key);
+                }
+            }, true);
 
             window.requestAnimationFrame(update);
             renderCrt();
@@ -92,7 +143,16 @@
         }
 
         function promptFileSelection(element) {
-            element.click();
+            if (element) {
+                element.click();
+            }
+        }
+
+        function focusMainButton() {
+            const element = document.querySelector('button[data-key="W"]');
+            if (element) {
+                element.focus();
+            }
         }
 
         function showError(element) {
@@ -142,7 +202,7 @@
                 color: new THREE.Color(0, 255, 0),
                 map: canvasTexture,
                 transparent: true,
-                emissiveIntensity: 0.0045,
+                emissiveIntensity: 0.0055,
                 emissive: new THREE.Color(0, 255, 0),
                 emissiveMap: canvasTexture
             });
@@ -271,6 +331,9 @@
                             const totalCount = resourcesToLoad.length;
                             const percentLoaded = 10 + parseInt((loadedCount * 90.0) / totalCount);
                             const progressbar = document.getElementById('progressbar');
+                            if (totalCount > 1) {
+                                progressbar.hidden = false;
+                            }
                             progressbar.value = percentLoaded;
                         });
 

@@ -1,16 +1,19 @@
-﻿[
-  {
-    "crc32": "",
-    "name": "Space Invaders",
-    "author": "David Winter",
-    "year": 1978,
-    "group": "Games",
-    "site": "https://github.com/kripod/chip8-roms",
-    "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Space%20Invaders%20%5BDavid%20Winter%5D.ch8",
-    "keyMap": {
-      "4": "←",
-      "5": "␣",
-      "6": "→"
+﻿{
+  "selected": "6FF0A017",
+  "roms": [
+    {
+      "crc32": "6FF0A017",
+      "name": "Space Invaders",
+      "author": "David Winter",
+      "year": 1978,
+      "group": "Games",
+      "ips": 1000,
+      "url": "https://raw.githubusercontent.com/kripod/chip8-roms/master/games/Space%20Invaders%20%5BDavid%20Winter%5D.ch8",
+      "keyMap": {
+        "4": "←",
+        "5": "␣",
+        "6": "→"
+      }
     }
-  }
-]
+  ]
+}
