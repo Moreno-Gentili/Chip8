@@ -323,17 +323,20 @@ html, body, pre, code, kbd, samp {
     position: relative;
     top: -2px;
     left: 10px;
+    margin-right: 20px;
 }
 
 #fullscreen-option img {
     top: 0;
     left: 0;
+    margin-right: 0;
 }
 
 #options label
 {
     position: relative;
     left: -10px;
+    margin-left: -20px;
 }
 
 #blazor-error-ui {

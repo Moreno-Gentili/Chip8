@@ -1,0 +1,78 @@
+﻿@using Chip8.Web.IO;
+@using Chip8.Web.Model;
+@inject IJSRuntime JsRuntime
+
+<nav id="options">
+    <span id="display-option">
+        <img src="images/display.png" alt="Display" />
+        <label>
+            <input type="radio" name="display-selection" class="nes-radio is-dark" checked value="@nameof(DisplayType.Crt)" @onchange="SetDisplay" />
+            <span>@nameof(DisplayType.Crt)</span>
+        </label>
+
+        <label>
+            <input type="radio" name="display-selection" class="nes-radio is-dark" value="@nameof(DisplayType.Lcd)" @onchange="SetDisplay" />
+            <span>@nameof(DisplayType.Lcd)</span>
+        </label>
+    </span>
+
+    <span id="audio-option">
+        <img src="images/audio.png" alt="Audio" />
+        <label>
+            <input type="radio" name="audio-selection" class="nes-radio is-dark" checked value="0" @onchange="SetAudio" />
+            <span>Off</span>
+        </label>
+
+        <label>
+            <input type="radio" name="audio-selection" class="nes-radio is-dark" value="1" @onchange="SetAudio" />
+            <span>On</span>
+        </label>
+    </span>
+
+    <span id="fullscreen-option">
+        <button type="button" title="Play in fullscreen" @onclick="SetFullscreen">
+            <img src="images/fullscreen.png" alt="Fullscreen" />
+        </button>
+    </span>
+</nav>
+
+@code {
+
+    [Parameter]
+    public Display? Display { get; set; }
+
+    [Parameter]
+    public ElementReference? Emulator { get; set; }
+
+    [Parameter]
+
+    public DisplayType DisplayType { get; set; }
+
+    [Parameter]
+    public EventCallback<DisplayType> DisplayTypeChanged { get; set; }
+
+    private async void SetDisplay(ChangeEventArgs args)
+    {
+        if (Display is null)
+        {
+            throw new InvalidOperationException("Display is not ready");
+        }
+
+        DisplayType = Enum.Parse<DisplayType>(args.Value?.ToString() ?? string.Empty);
+        Display.Connect(DisplayType);
+        await DisplayTypeChanged.InvokeAsync(DisplayType);
+    }
+
+    private async void SetAudio(ChangeEventArgs args)
+    {
+        string audioFunctionName = args.Value?.Equals("0") == true ?
+                                        "disableAudio" : "enableAudio";
+
+        await JsRuntime.InvokeVoidAsync(audioFunctionName);
+    }
+
+    private async void SetFullscreen()
+    {
+        await JsRuntime.InvokeVoidAsync("setFullscreen", Emulator);
+    }
+}
