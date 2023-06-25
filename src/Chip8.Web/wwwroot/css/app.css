@@ -95,7 +95,7 @@ h2 {
 }
 
 #selector .nes-select {
-    width: 740px !important;
+    width: 760px !important;
 }
 
 #selector .nes-btn {
@@ -107,12 +107,43 @@ h2 {
     margin:20px;
     box-sizing: border-box;
     grid-template-columns: repeat(4, 50px);
+    position: relative;
 }
 
     #keyboard button {
         width: 50px;
         height: 50px;
     }
+
+    #keyboard button:not(.is-disabled) {
+        position: relative; 
+        z-index: 91;
+    }
+
+#help-backdrop {
+    background-color: rgba(0,0,0,0.8);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 90;
+    width: 100%;
+    height: 100%;
+}
+
+#help {
+    position: absolute;
+    z-index: 92;
+    top: -162px;
+    left: -250px;
+    width: 300px;
+    font-size: 0.7rem
+}
+
+#help button {
+    width: 120px;
+}
 
 #debug {
     font-size: 10px;
@@ -205,7 +236,6 @@ html, body, pre, code, kbd, samp {
 }
 
 #crt {
-    background-color: var(--main-bg-color);
     background-image: url('../images/crt.png');
     z-index: 2;
 }

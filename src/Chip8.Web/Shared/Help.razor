@@ -1,0 +1,17 @@
+﻿<div id="help-backdrop" hidden="@(!Open)"></div>
+<section id="help" class="message-right" hidden="@(!Open)">
+    <div class="nes-balloon from-right is-dark">
+        <p>Click these buttons or press the keys on your keyboard.</p>
+        <p>Arrows and spacebar can be used, too!</p>
+        <button type="button" class="nes-btn is-success" @onclick="Close">Got it!</button>
+    </div>
+</section>
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    private void Close()
+    {
+        Open = false;
+    }
+}

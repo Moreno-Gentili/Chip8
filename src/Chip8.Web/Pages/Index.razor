@@ -23,7 +23,7 @@
         <InputFile @ref="fileSelector" OnChange="LoadRomFromDisk" class="btn-primary" accept=".rom,.ch8" hidden />
         <div class="nes-select is-dark">
             <select @ref="romSelector" @onchange="LoadRom">
-                <option value="">Load from local cassette...</option>
+                <option value="">Load from cassette...</option>
                 @if (diskRomPath is not null)
                 {
                     <option value="." selected>@diskRomPath</option>
@@ -42,7 +42,7 @@
         <button type="button" class="nes-btn is-error" @onclick="Reset">Reset</button>
     </header>
     <section @ref="emulator" id="emulator">
-        <article id="display">
+        <article id="display" @onclick="@ShowHelp">
             <div id="lcd">
                 <BlazorCanvas @ref="canvas">
                     <canvas width="@canvasWidth" height="@canvasHeight" hidden="@(displayType != DisplayType.Lcd)"></canvas>
@@ -54,6 +54,7 @@
         @if (keyboard is not null)
         {
             <aside id="keyboard">
+                <Help Open="@helpOpen" />
                 @foreach (var entry in keyboard.Keys)
                 {
                     <button type="button" data-key="@entry.Key" class="@GetKeyboardButtonClassName(entry.Value)" @onmousedown="() => keyboard.HandleKeyDown(entry.Value)" @onmouseup="() => keyboard.HandleKeyUp(entry.Value)">@entry.Key<span class="alt-key" data-key="@GetKeyboardAltKey(entry.Value)">@GetKeyboardAltKey(entry.Value)</span></button>
@@ -197,6 +198,7 @@
     List<float> fps = new();
     float lastUpdate = 0;
     string? defaultSelectedRom;
+    bool helpOpen = false;
 
     Rom[] roms = new Rom[0];
 
@@ -549,6 +551,14 @@
         {
             shouldStep = null;
             vm.ResetClock();
+        }
+    }
+
+    private void ShowHelp()
+    {
+        if (!helpOpen)
+        {
+            helpOpen = true;
         }
     }
 
