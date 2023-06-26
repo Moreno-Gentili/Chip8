@@ -30,8 +30,7 @@ window.renderCrt = function() {
     scene.add(cube);
 
     // Create camera
-    // const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000000);
+    const camera = new THREE.PerspectiveCamera(100, 640 / 320, 1, 1000000);
     camera.position.z = 1.5;
 
     // Create effect composer
@@ -58,7 +57,7 @@ window.renderCrt = function() {
     effect.uniforms["aspectRatio"].value = camera.aspect;
     effect.uniforms["cylindricalRatio"].value = cylindricalRatio;
 
-    renderer.setSize(640, 320);
+    renderer.setSize(640, 320, false);
     document.getElementById('crt').appendChild(renderer.domElement);
 
     animate.bind(this, () => {

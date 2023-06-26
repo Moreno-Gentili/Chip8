@@ -3,6 +3,10 @@
     --dark-bg-color: #131518;
 }
 
+* {
+    touch-action: manipulation;
+}
+
 a, a:visited {
     color: lime;
 }
@@ -74,6 +78,7 @@ h1 {
     font-size: 57px;
     text-align: center;
     text-transform: uppercase;
+    margin-bottom: 0;
 }
 
 h2 {
@@ -135,15 +140,20 @@ h2 {
 #help {
     position: absolute;
     z-index: 92;
-    top: -162px;
-    left: -250px;
-    width: 300px;
-    font-size: 0.7rem
+    top: -157px;
+    left: -200px;
+    width: 250px;
+    font-size: 0.7rem;
 }
 
-#help button {
-    width: 120px;
-}
+    #help button {
+        width: 120px !important;
+        height: 40px !important;
+    }
+
+    #help .nes-balloon {
+        padding: 10px;
+    }
 
 #debug {
     font-size: 10px;
@@ -189,7 +199,7 @@ h2 {
 
 .github-link {
     position: absolute;
-    top: 0;
+    top: 12px;
     right: 40px;
 }
 
@@ -322,13 +332,6 @@ html, body, pre, code, kbd, samp {
         justify-content: center;
     }
 
-@media screen and (min-width: 1002px) 
-{
-    #options {
-        margin-left: -125px;
-    }
-}
-
 #options img {
     position: relative;
     top: -2px;
@@ -377,3 +380,25 @@ html, body, pre, code, kbd, samp {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+@media screen and (min-width: 1002px) {
+    #options {
+        margin-left: -125px;
+    }
+}
+
+@media screen and (max-width: 1001px)
+{
+    h1, h2 {
+        text-align: left;
+    }
+
+    #keyboard {
+        grid-template-columns: repeat(4, 70px);
+    }
+
+        #keyboard button {
+            width: 70px;
+            height: 70px;
+        }
+}

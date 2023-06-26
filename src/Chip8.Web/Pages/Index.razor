@@ -55,7 +55,7 @@
                 <Help Open="@helpOpen" />
                 @foreach (var entry in keyboard.Keys)
                 {
-                    <button type="button" data-key="@entry.Key" class="@GetKeyboardButtonClassName(entry.Value)" @onmousedown="() => keyboard.HandleKeyDown(entry.Value)" @onmouseup="() => keyboard.HandleKeyUp(entry.Value)">@entry.Key<span class="alt-key" data-key="@GetKeyboardAltKey(entry.Value)">@GetKeyboardAltKey(entry.Value)</span></button>
+                    <button type="button" data-key="@entry.Key" class="@GetKeyboardButtonClassName(entry.Value)" @onmousedown="() => keyboard.HandleKeyDown(entry.Value)" @onmouseup="() => keyboard.HandleKeyUp(entry.Value)" @ontouchstart="() => keyboard.HandleKeyDown(entry.Value)" @ontouchend="() => keyboard.HandleKeyUp(entry.Value)">@entry.Key<span class="alt-key" data-key="@GetKeyboardAltKey(entry.Value)">@GetKeyboardAltKey(entry.Value)</span></button>
                 }
             </aside>
         }
