@@ -1,19 +1,26 @@
 # Chip-8 emulator
 A Chip-8 emulator written in C# for .NET 7, hosted in a Blazor WASM application. 
 
+![Preview](src/Chip8.Web/wwwroot/images/preview.gif)
+
+
 ## Getting started
 This solution is composed of 4 projects:
-- [src/Chip8.Model] just interfaces modeling the various Chip-8 components;
-- [src/Chip8] the actual implementation;
-- [src/Chip8.Web] the Blazor WASM host, this is the starting project;
-- [test/Chip8.Tests] suite of unit tests.
+- [src/Chip8.Model](src/Chip8.Model) just interfaces modeling the various Chip-8 components;
+- [src/Chip8](src/Chip8) the actual implementation;
+- [src/Chip8.Web](src/Chip8.Web) the Blazor WASM host, this is the starting project;
+- [test/Chip8.Tests](test/Chip8.Tests) suite of unit tests.
+
+![Diagram](src/Chip8.Web/wwwroot/images/diagram.png)
 
 ## Running the application
-Clone this repo, than execute this commands:
+Clone this repo, than execute these commands:
 ```
 cd src/Chip8.Web
 dotnet run
 ```
+
+Finally, visit the URL that's being printed in the console.
 
 ## Useful links
 - [Design overview](http://www.cs.columbia.edu/~sedwards/classes/2016/4840-spring/designs/Chip8.pdf)
