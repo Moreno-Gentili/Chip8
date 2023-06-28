@@ -62,7 +62,7 @@ function initEmulator(emulator) {
     window.requestAnimationFrame(update);
     let renderInterval;
     renderInterval = setInterval(function () {
-        if (renderCrt) {
+        if ('renderCrt' in window) {
             clearInterval(renderInterval);
             renderCrt();
         }
